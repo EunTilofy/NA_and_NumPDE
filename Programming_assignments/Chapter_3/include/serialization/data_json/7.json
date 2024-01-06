@@ -1,0 +1,12 @@
+[
+   "EunTilofy",
+   20,
+   "Zhejiang University",
+   {
+      "Abstract Algebra" : 95.0,
+      "Computer Architecture" : 95.0,
+      "Number Analysis" : 95.0,
+      "Operating System" : 95.0
+   },
+   [ "Antinovae", "LLL", "gym" ]
+]

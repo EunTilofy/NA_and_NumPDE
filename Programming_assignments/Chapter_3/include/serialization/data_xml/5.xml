@@ -1,0 +1,19 @@
+<serialization>
+    <std_vector>
+        <Element0>
+            <std_string>1</std_string>
+        </Element0>
+        <Element1>
+            <std_string>2</std_string>
+        </Element1>
+        <Element2>
+            <std_string>3</std_string>
+        </Element2>
+        <Element3>
+            <std_string>4</std_string>
+        </Element3>
+        <Element4>
+            <std_string>5</std_string>
+        </Element4>
+    </std_vector>
+</serialization>

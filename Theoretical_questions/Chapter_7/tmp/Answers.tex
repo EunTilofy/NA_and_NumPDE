@@ -1,0 +1,251 @@
+%!TEX program = xelatex
+% 完整编译: xelatex -> biber/bibtex -> xelatex -> xelatex
+\documentclass[lang=cn,a4paper,newtx,bibend=bibtex]{elegantpaper}
+
+\title{Problems of Chapter 7}
+\author{张志心 \ 混合2106}
+
+\date{\zhdate{2023/12/28}}
+
+% \qedhere to make the square straight after
+
+\usepackage{array}
+\usepackage{tcolorbox}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{float}
+\usepackage{bm}
+\usepackage{amsmath}
+
+\newtcolorbox{prob}[1][]{
+  colframe=gray,
+  colback=white,
+  boxrule=1.5pt, % 控制外边框线的宽度
+  sharp corners, % 使用直角边框
+  fonttitle=\bfseries,
+  title=#1
+}
+
+\newcommand{\ccr}[1]{\makecell{{\color{#1}\rule{1cm}{1cm}}}}
+\newcommand{\xB}{\bm{x}}
+\newcommand{\XB}{\bm{X}}
+\newcommand{\yB}{\bm{y}}
+\newcommand{\gB}{\bm{g}}
+\newcommand{\uB}{\bm{u}}
+\newcommand{\vB}{\bm{v}}
+\newcommand{\wB}{\bm{w}}
+\newcommand{\wanwan}[1]{\tilde{#1}}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\RBB}{\mathbb{R}}
+\newcommand{\CBB}{\mathbb{C}}
+\newcommand{\FBB}{\mathbb{F}}
+\newcommand{\FM}{\mathcal{F}}
+\newcommand{\SM}{\mathcal{S}}
+\newcommand{\LM}{\mathcal{L}}
+\newcommand{\VM}{\mathcal{V}}
+\newcommand{\CM}{\mathcal{C}}
+\newcommand{\apart}[3]{\frac{\partial^{#3}{#1}}{\partial {#2}^{#3}}}
+\newcommand{\dpart}[3]{\dfrac{\partial^{#3}{#1}}{\partial {#2}^{#3}}}
+\newcommand{\upset}[2]{\stackrel{#1}{#2}}
+\newcommand{\domf}{\textrm{dom}\;f}
+\newcommand{\Int}[4]{\int_{#1}^{#2}{#3}{\dd {#4}}}
+\newcommand{\indot}[2]{\langle {#1}, {#2} \rangle}
+\newcommand{\functiontype}[3]{\FM_{#1}^{#2,#3}(\RBB^n)}
+\newcommand{\normgen}[1]{\left\| #1 \right\|}
+\newcommand{\strongconvextype}[2]{\SM_{#1}^{#2}(\RBB^n)}
+\newcommand{\argmin}{\mathop{\rm argmin}}
+
+\pgfplotsset{compat=1.17}
+
+\addbibresource[location=local]{reference.bib}
+
+\begin{document}
+
+\maketitle
+
+\begin{prob}[Exercise 7.14]
+  Suppose a grid function $\gB \to \XB \to \RBB$ has $\XB:= \{x_1, x_2, \cdots, x_N\}$,
+  $g_1 = O(h), g_N = O(h)$, and $g_j = O(h^2)$ for all $j = 2, \cdots, N - 1$. Show that
+  \[\| g\|_{\infty} = O(h), \|g\|_1 = O(h^2), \|g\|_2 = O(h^{\frac32}).\]
+  As the main point of this exercise, the differences in the max-norm, 1-norm, 
+  and 2-norm of a grid function often reveal the percentage of components
+  with large magnitude.
+\end{prob}
+
+\begin{proof}
+设 $C = O(1)$，满足 $|g_1|, |g_n| \le Ch$，$|g_j| \le Ch^2, \forall j = 2, 3, \cdots, N-1$。
+
+\[ \| g\|_{\infty} = \max_{j = 1}^N |g_j| \le Ch = O(h).\]
+
+\[\|g\|_1 = h \sum_{j = 1}^N |g_j| \le h (2Ch + C(N-2)h^2) \le 3Ch^2 = O(h^2).\]
+
+\[\|g\|_2 = (h\sum_{j=1}^N|g_j|^2)^{\frac12} \le (h(2C^2h^2 + (N-2)C^2h^4))^{\frac12} \le 2Ch^{\frac32} = O(h^{\frac32}).\]
+
+\end{proof}
+
+\begin{prob}[Exercise 7.26]
+  Show that the set of eigenvectors (7.26) of A in (7.13) is orthogonal, i.e.,
+  \[\indot{w_i}{w_k} = \begin{cases} 0 & i \neq k; \\ \dfrac{m+1}2 & i = k\end{cases},\]
+  where $\indot{\cdot}{\cdot}$ denotes the dot product.
+\end{prob}
+
+\begin{proof}
+  对于 $i \neq k$，由 Lemma 7.25，有
+  \begin{equation*}
+  \begin{aligned}
+    \indot{w_i}{w_k} &= \sum_{j = 1}^m \sin \dfrac{ji\pi}{m+1} \sin \dfrac{jk\pi}{m+1} = -\dfrac12 \sum_{j = 1}^m \left[\cos \dfrac{j(i+k)\pi}{m+1} - \cos \dfrac{j(i -k)\pi}{m+1}\right]
+  \end{aligned}
+  \end{equation*}
+  因为，当 $d\in \mathbb{Z}, d\neq 0$ 时，
+  \[\sum_{j =1}^{m+1} e^{\imath\frac{jd\pi}{m+1}} = \dfrac{e^{\imath\frac{d\pi}{m+1}} \left(\left(e^{\imath\frac{d\pi}{m+1}}\right)^{m+1} - 1\right)}{e^{\imath\frac{d\pi}{m+1}} - 1} = 0,\]
+  取实部，得
+  \[\sum_{j=1}^{m+1} \cos \dfrac{jd\pi}{m+1} = 0 \Rightarrow \sum_{j = 1}^m \cos \dfrac{jd\pi}{m+1} = - \cos \dfrac{(m+1)d\pi}{m+1} = (-1)^{d+1}.\]
+  所以
+  \[\indot{w_i}{w_k} = -\dfrac12 [(-1)^{i+k-1} - (-1)^{i-k-1}] = 0.\]
+
+  对于 $i = k$，
+  \[\indot{w_i}{w_i} = \sum_{j = 1}^{m} \sin^2 \dfrac{ji\pi}{m+1} = -\dfrac12 \sum_{j = 1}^m \left[\cos \dfrac{j(2i)\pi}{m+1} - \cos 0 \right]= \frac12 [m - (-1)^{2i+1}] = \dfrac{m + 1}{2}. \]
+
+\end{proof}
+
+\begin{prob}[Exercise 7.36]
+  Show that all elements of the first column of $B_E = A_E^{-1}$ are $O(1)$.
+\end{prob}
+
+\begin{proof}
+根据题意，$A_EB_E = I$。
+
+设 $B_E$ 的第一列为 $\beta_0, \beta_1, \cdots, \beta_m, \beta_{m + 1}$。
+
+比较两端的第一列得线性方程组
+
+\[
+\begin{cases}
+  -\beta_0 + \beta_1 = h \\
+  \beta_0 - 2\beta_1 + \beta_2 = 0 \\
+  \beta_1 - 2\beta_2 + \beta_3  = 0 \\
+  \cdots \\
+  \beta_{m-1} - 2\beta_m + \beta_{m+1} = 0 \\
+  \beta_{m + 1} = 0
+\end{cases}
+\]
+
+将 $\beta_k = (m - k + 1) \beta_m$ 代入第一个方程得到 $\beta_m = -h$。
+
+因此 $\beta_k = -(m - k + 1) h \le -(m + 1) h = -(1 + \frac1m) = O(1)$。
+\end{proof}
+
+\begin{prob}[Exercise 7.41]
+  Show that the LTE $\tau$ of the FD method in 
+  Example 7.40 is $\tau_{i, j} = -\frac{1}{12} h^2 \left(\dfrac{\partial^4 u}{\partial x^4} + 
+  \dfrac{\partial^4 u}{\partial y^4}\right)\bigg|_{(x_i, y_i)} + O(h^4).$
+\end{prob}
+
+\begin{proof}
+  根据 LTE 公式，
+  \begin{equation*}
+  \begin{aligned}
+  \tau_{i,j} = &- \dfrac{u(x_{i-1}, y_j) - 2u(x_i, y_j) + u(x_{i+1}, y_j)}{h^2} 
+  -\dfrac{u(x_i, y_{j-1}) - 2u(x_i, y_j) + u(x_i, y_{j+1})}{h^2} \\
+  &+ \dfrac{\partial^2 u}{\partial x^2} (x_i, y_j) + \dfrac{\partial^2 u}{\partial y^2} (x_i, y_j).
+  \end{aligned}
+  \end{equation*}
+  将 $u$ 在 $(x_i, y_j)$ 处关于 $x$ 和 $y$ 泰勒展开到前 6 阶，
+  \begin{equation*}
+  \begin{aligned}
+  u(x_i, y_j)     = \left(u - h\apart{u}{x}{} + \frac{h^2}{2} \apart{u}{x}{2} - \frac{h^3}6\apart{u}{x}{3} + \frac{h^4}{24}\apart{u}{x}{4} - \frac{h^5}{120} \apart{u}{x}{5} + \frac{h^6}{720} \apart{u}{x}{6} \right)\bigg|_{(x_i, y_j)} + o(h^6) \\
+  u(x_{i+1}, y_j) = \left(u + h\apart{u}{x}{} + \frac{h^2}{2} \apart{u}{x}{2} + \frac{h^3}6\apart{u}{x}{3} + \frac{h^4}{24}\apart{u}{x}{4} + \frac{h^5}{120} \apart{u}{x}{5} + \frac{h^6}{720} \apart{u}{x}{6} \right)\bigg|_{(x_i, y_j)} + o(h^6) \\
+  u(x_i, y_{j-1}) = \left(u - h\apart{u}{y}{} + \frac{h^2}{2} \apart{u}{y}{2} - \frac{h^3}6\apart{u}{y}{3} + \frac{h^4}{24}\apart{y}{x}{4} - \frac{h^5}{120} \apart{u}{y}{5} + \frac{h^6}{720} \apart{u}{y}{6} \right)\bigg|_{(x_i, y_j)} + o(h^6) \\
+  u(x_i, y_{j+1}) = \left(u + h\apart{u}{y}{} + \frac{h^2}{2} \apart{u}{y}{2} + \frac{h^3}6\apart{u}{y}{3} + \frac{h^4}{24}\apart{y}{x}{4} + \frac{h^5}{120} \apart{u}{y}{5} + \frac{h^6}{720} \apart{u}{y}{6} \right)\bigg|_{(x_i, y_j)} + o(h^6)
+  \end{aligned}
+  \end{equation*} 
+  
+  代入，整理得，
+  \[\tau_{i,j} = -\dfrac1{12} h^2 \left(\apart{u}{x}{4} + \apart{u}{y}{4}\right) - \dfrac1{360}h^4\left(\apart{u}{x}{6} + \apart{u}{y}{6}\right) + o(h^4).\]
+  
+  所以，
+  $\tau_{i, j} = -\frac{1}{12} h^2 \left(\dfrac{\partial^4 u}{\partial x^4} + 
+    \dfrac{\partial^4 u}{\partial y^4}\right)\bigg|_{(x_i, y_i)} + O(h^4).$
+  \end{proof}
+
+\begin{prob}[Exercise 7.61]
+  Show that, in Example 7.60, the LTE at an irregular equation-discretization point
+  is $O(h)$ while the LTE at a regualr equation-discretization point is $O(h^2)$.
+\end{prob}
+
+\begin{proof}
+  根据 LTE 公式，在正则点处，若它的 Stencil 都是正则点，则有
+  \begin{equation*}
+  \begin{aligned}
+  \tau_{i,j} =& -\dfrac{u(x_{i-1}, y_j) - 2u(x_i, y_j) + u(x_{i+1}, y_j) - u(x_i, y_{j-1}) - 2u(x_i, y_j) + u(x_i, y_{j+1})}{h^2} \\
+&-\apart{u}{x}{2}(x_i, y_j) + \apart{u}{y}{2} (x_i, y_j).
+  \end{aligned}
+  \end{equation*}
+
+这和规则区域的误差相同，都为 $-\frac1{12} h^2 \left(\apart{u}{x}{4} + \apart{u}{y}{4}\right)\bigg|_{(x_i, y_j)} + O(h^4)$。
+
+若 $x$ 轴方向有一个非正则点，不妨设非正则点在正方向。设其坐标为 $(x_i + \theta h, y_i)$。
+
+则 $x$ 方向对 LTE 的贡献为
+
+\begin{equation*}
+  \begin{aligned}
+  &-\dfrac{\theta u(x_i - h, y_j) - (1 + \theta)u(x_i, y_j) + u(x_i + \theta h, y_j)}{\frac12 \theta (1+\theta)h^2} + \apart{u}{x}{2}(x_i, y_j) \\
+=& \left(- \dfrac{\theta(u - hu_x + \dfrac{h^2}2 u_{xx} + \dfrac{h^3}6 u_{xxx} + O(h^4)) - (1+\theta)u + (u + \theta h u_x + \dfrac{\theta^2 h^2}{2}u_{xx} + \dfrac{\theta^3 h^3}{6} u_{xxx} + O(h^4))}{\dfrac12 \theta (1 + \theta)h^2} + u_{xx}\right)\bigg|_{(x_i, y_j)}
+\\=& \dfrac{1 - \theta}{3} hu_{xxx} (x_i, y_j) + O(h^2)  
+\end{aligned}
+\end{equation*}
+
+同理可以证明，当 $y$ 轴方向有非正则点，其 LTE 也为 $O(h)$。特别地，如果 $P$ 点附近边界即 $x, y$ 方向都有非正则点，则
+LTE 的表达式为
+
+\[\tau_P = \left(\dfrac{1 - \theta}{3}h u_{xxx}+ \dfrac{1 - \alpha}{3} h u_{yyy}\right) \bigg|_{P}.\]
+
+综上，若 Stencil 都为正则点，则 LTE 为 $O(h^2)$；否则，LTE 为 $O(h)$。
+\end{proof}
+
+
+\begin{prob}[Exercise 7.63]
+  Prove Theorem 7.62 by choosing a function $\psi$ to which Lemma 7.57 applies.
+  \begin{prob}
+    Suppose that, in the notation of Theorem 7.59, the set
+    $\XB_{\Omega}$ of equation-discretization points can be partitioned
+    as 
+    \[\XB_{\Omega} = \XB_1 \cup \XB_2, \XB_1 \cap \XB_2 = \emptyset,\]
+    the nonnegative function : $\phi : \XB\to \RBB$ satisfies
+    \[\forall P \in \XB_1, L_h\phi_P \le -C_1 < 0;\]
+    \[\forall P \in \XB_2, L_h\phi_P \le -C_2 < 0,\]
+    and the LTE of (7.79) satisfy
+    \[\forall P \in \XB_1, |T_P| < T_1;\]
+    \[\forall P \in \XB_2, |T_P| < T_2.\]
+    Then the solution error $E_p := U_P - u(P)$ of the FD method (7.79)
+    is bounded by
+    \[\forall P \in \XB, |E_P| \le \left(\max_{Q\in \XB_{\partial \Omega} \phi(Q)}\right) \max\left\{\dfrac{T_1}{C_1}, \dfrac{T_2}{C_2}\right\}\]
+  \end{prob}
+\end{prob}
+
+\begin{proof}
+定义
+\[\psi : \XB \to \RBB, \psi_P = E_P + T_m \phi_P.\]
+
+其中 $T_m = \max\{\dfrac{T_1}{C_1}, \dfrac{T_2}{C_2}\}$。则当 $P \in \XB_1$ 时，
+\[L_h \psi_P = L_h(E_P + T_m\phi_P) \le - T_P - \dfrac{T_1}{C_1} C_1 \le 0,\]
+ 
+同理 $L_h \psi_P \le 0, P \in \XB_2$。
+
+因此 $L_h\psi_P \le 0, P \in \XB$。
+
+又因为 $\max_{P\in \XB} \phi_P \ge 0$，所以 $\max_{P\in \XB} \phi_P \ge 0$。再由 $E_Q \big|_{\XB_{\partial \Omega}} =0 $，
+结合 Lemma 7.57 得，
+
+\[E_P \le \max_{P\in\XB} (E_P + T_m \phi_P) \le \max_{Q\in \XB_{\partial \Omega}} E_Q + T_m \phi_Q = T_m \max_{Q\in \XB_{\partial \Omega}} (\phi_Q).\]
+
+因此 $E_P \le T_m \max_{Q\in \XB_{\partial \Omega}}。$
+
+对 $\psi_P = -E_P + T_m \phi_P$ 作同样处理，则可证明 $-E_P \le T_m \max_{Q\in \XB_{\partial \Omega}}$。
+\end{proof}
+
+\nocite{*}
+\printbibliography[heading=bibintoc, title=\ebibname]
+
+\end{document}

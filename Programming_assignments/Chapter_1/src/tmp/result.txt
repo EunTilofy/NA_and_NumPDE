@@ -1,0 +1,278 @@
+Result of ProblemB : 
+
+Solving x^{-1} - \tan x on [0, \pi/2]
+--------------------Using Bisection Method------------------------
+Iteration times = 24
+Approximate root = 0.8603336024
+Function value = -0.0000000495
+Norm(b-a) = 0.0000000936
+------------------------------------------------------------------
+
+Solving x^{-1} - 2^x on [0, 1]
+--------------------Using Bisection Method------------------------
+Iteration times = 17
+Approximate root = 0.6411857605
+Function value = -0.0000000562
+Norm(b-a) = 0.0000076294
+------------------------------------------------------------------
+
+Solving 2^{-x} + exp(x) + 2*cos(x) - 6 on [1, 3]
+--------------------Using Bisection Method------------------------
+Iteration times = 22
+Approximate root = 1.8293836117
+Function value = 0.0000000400
+Norm(b-a) = 0.0000004768
+------------------------------------------------------------------
+
+Solving (x^3+4*x^2+3*x+5)/(2*x^3-9x^2+18*x-2) on [0, 4]
+--------------------Using Bisection Method------------------------
+Iteration times = 29
+Approximate root = 0.1178765632
+Function value = -94846963.1651846021
+Norm(b-a) = 0.0000000075
+------------------------------------------------------------------
+
+
+Result of ProblemC : 
+
+Solving x-tan(x)=0 with initial point x0 = 4.5
+--------------------Using Newton Method---------------------------
+Iteration times = 3
+Approximate root = 4.4934094579
+Function value = -0.0000000000
+Norm of Derivative = 20.1907660925
+------------------------------------------------------------------
+
+Solving x-tan(x)=0 with initial point x0 = 7.7
+--------------------Using Newton Method---------------------------
+Iteration times = 4
+Approximate root = 7.7252518369
+Function value = -0.0000000000
+Norm of Derivative = 59.6798068874
+------------------------------------------------------------------
+
+
+Result of ProblemD : 
+
+Solving sin(x/2)-1 with x0=0, x1=\pi/2
+--------------------Using Secant Method---------------------------
+Using Secant Method:
+Iteration times = 16
+Approximate root = 3.1409322315
+Function value = -0.0000000545
+Norm(x(k)-x(k-1)) = 0.0004081633
+------------------------------------------------------------------
+Solving sin(x/2)-1 with x0=14, x1=15
+--------------------Using Secant Method---------------------------
+Using Secant Method:
+Iteration times = 15
+Approximate root = 15.7074076584
+Function value = -0.0000000386
+Norm(x(k)-x(k-1)) = 0.0003433855
+------------------------------------------------------------------
+
+Solving exp(x)-tan(x) with x0=1, x1=1.4
+--------------------Using Secant Method---------------------------
+Using Secant Method:
+Iteration times = 9
+Approximate root = 1.3063269404
+Function value = -0.0000000000
+Norm(x(k)-x(k-1)) = 0.0000000151
+------------------------------------------------------------------
+
+Solving exp(x)-tan(x) with x0=-2.8, x1=-3.1
+--------------------Using Secant Method---------------------------
+Using Secant Method:
+Iteration times = 2
+Approximate root = -3.0964122941
+Function value = -0.0000000103
+Norm(x(k)-x(k-1)) = 0.0001338862
+------------------------------------------------------------------
+
+Solving x^3-12x^2+3x+1 with x0=0, x1=-0.5
+--------------------Using Secant Method---------------------------
+Using Secant Method:
+Iteration times = 6
+Approximate root = -0.1886854043
+Function value = -0.0000000063
+Norm(x(k)-x(k-1)) = 0.0000019974
+------------------------------------------------------------------
+
+Solving x^3-12x^2+3x+1 with x0=8, x1=9
+--------------------Using Secant Method---------------------------
+Using Secant Method:
+Iteration times = 10
+Approximate root = 11.7371421792
+Function value = 0.0000000004
+Norm(x(k)-x(k-1)) = 0.0000001458
+------------------------------------------------------------------
+
+
+Result of ProblemE : 
+
+Solving Problem E with : V = 12.4, L = 10, r = 1
+--------------------Using Bisection Method------------------------
+Iteration times = 6
+Approximate root = 0.1640625000
+Function value = -0.0414932414
+Norm(b-a) = 0.0156250000
+------------------------------------------------------------------
+--------------------Using Newton Method---------------------------
+Iteration times = 1
+Approximate root = 0.1653981634
+Function value = -0.0151449150
+Norm of Derivative = 20.0000000000
+------------------------------------------------------------------
+--------------------Using Secant Method---------------------------
+Using Secant Method:
+Iteration times = 3
+Approximate root = 0.1662278952
+Function value = 0.0012200043
+Norm(x(k)-x(k-1)) = 0.0153874090
+------------------------------------------------------------------
+
+
+Result of ProblemF : 
+
+Solving Problem F(a) : x0=33, l = 89, h = 49, D = 55, beta1 = 11.5
+--------------------Using Newton Method---------------------------
+Iteration times = 2
+Approximate root = 32.9721748224
+Function value = 0.0000000000
+Norm of Derivative = 0.9129412717
+------------------------------------------------------------------
+Solving Problem F(b) : x0=33, l = 89, h = 49, D = 30, beta1 = 11.5
+--------------------Using Newton Method---------------------------
+Iteration times = 2
+Approximate root = 33.1689038218
+Function value = 0.0000000013
+Norm of Derivative = 0.9140901657
+------------------------------------------------------------------
+Solving Problem F(c) : x0=0, x1=10, l = 89, h = 49, D = 55, beta1 = 11.5
+--------------------Using Secant Method---------------------------
+Using Secant Method:
+Iteration times = 8
+Approximate root = -11.4999999493
+Function value = -0.0000000586
+Norm(x(k)-x(k-1)) = 0.0001280032
+------------------------------------------------------------------
+Solving Problem F(c) : x0=10, x1=20, l = 89, h = 49, D = 55, beta1 = 11.5
+--------------------Using Secant Method---------------------------
+Using Secant Method:
+Iteration times = 6
+Approximate root = 32.9721748162
+Function value = -0.0000000057
+Norm(x(k)-x(k-1)) = 0.0000449806
+------------------------------------------------------------------
+Solving Problem F(c) : x0=20, x1=30, l = 89, h = 49, D = 55, beta1 = 11.5
+--------------------Using Secant Method---------------------------
+Using Secant Method:
+Iteration times = 5
+Approximate root = 32.9721748224
+Function value = -0.0000000000
+Norm(x(k)-x(k-1)) = 0.0000001409
+------------------------------------------------------------------
+Solving Problem F(c) : x0=30, x1=40, l = 89, h = 49, D = 55, beta1 = 11.5
+--------------------Using Secant Method---------------------------
+Using Secant Method:
+Iteration times = 4
+Approximate root = 32.9721748157
+Function value = -0.0000000061
+Norm(x(k)-x(k-1)) = 0.0000385182
+------------------------------------------------------------------
+Solving Problem F(c) : x0=40, x1=50, l = 89, h = 49, D = 55, beta1 = 11.5
+--------------------Using Secant Method---------------------------
+Using Secant Method:
+Iteration times = 5
+Approximate root = 32.9721748224
+Function value = 0.0000000000
+Norm(x(k)-x(k-1)) = 0.0000001637
+------------------------------------------------------------------
+Solving Problem F(c) : x0=50, x1=60, l = 89, h = 49, D = 55, beta1 = 11.5
+--------------------Using Secant Method---------------------------
+Using Secant Method:
+Iteration times = 5
+Approximate root = 32.9721748224
+Function value = -0.0000000000
+Norm(x(k)-x(k-1)) = 0.0000003993
+------------------------------------------------------------------
+Solving Problem F(c) : x0=60, x1=70, l = 89, h = 49, D = 55, beta1 = 11.5
+--------------------Using Secant Method---------------------------
+Using Secant Method:
+Iteration times = 6
+Approximate root = 32.9721748225
+Function value = 0.0000000001
+Norm(x(k)-x(k-1)) = 0.0000038786
+------------------------------------------------------------------
+Solving Problem F(c) : x0=70, x1=80, l = 89, h = 49, D = 55, beta1 = 11.5
+--------------------Using Secant Method---------------------------
+Using Secant Method:
+Iteration times = 7
+Approximate root = -11.4999999999
+Function value = -0.0000000001
+Norm(x(k)-x(k-1)) = 0.0000025292
+------------------------------------------------------------------
+Solving Problem F(c) : x0=80, x1=90, l = 89, h = 49, D = 55, beta1 = 11.5
+--------------------Using Secant Method---------------------------
+Using Secant Method:
+Iteration times = 13
+Approximate root = 216867.0278251776
+Function value = 0.0000000000
+Norm(x(k)-x(k-1)) = 0.0000008825
+------------------------------------------------------------------
+Solving Problem F(c) : x0=90, x1=100, l = 89, h = 49, D = 55, beta1 = 11.5
+--------------------Using Secant Method---------------------------
+Using Secant Method:
+Iteration times = 8
+Approximate root = -1407.0278251776
+Function value = -0.0000000001
+Norm(x(k)-x(k-1)) = 0.0000015937
+------------------------------------------------------------------
+Solving Problem F(c) : x0=100, x1=110, l = 89, h = 49, D = 55, beta1 = 11.5
+--------------------Using Secant Method---------------------------
+Using Secant Method:
+Iteration times = 8
+Approximate root = 147.0278252723
+Function value = -0.0000000452
+Norm(x(k)-x(k-1)) = 0.0001606152
+------------------------------------------------------------------
+Solving Problem F(c) : x0=110, x1=120, l = 89, h = 49, D = 55, beta1 = 11.5
+--------------------Using Secant Method---------------------------
+Using Secant Method:
+Iteration times = 6
+Approximate root = 147.0278251774
+Function value = 0.0000000001
+Norm(x(k)-x(k-1)) = 0.0000025245
+------------------------------------------------------------------
+Solving Problem F(c) : x0=120, x1=130, l = 89, h = 49, D = 55, beta1 = 11.5
+--------------------Using Secant Method---------------------------
+Using Secant Method:
+Iteration times = 6
+Approximate root = 147.0278251735
+Function value = 0.0000000019
+Norm(x(k)-x(k-1)) = 0.0000221470
+------------------------------------------------------------------
+Solving Problem F(c) : x0=130, x1=140, l = 89, h = 49, D = 55, beta1 = 11.5
+--------------------Using Secant Method---------------------------
+Using Secant Method:
+Iteration times = 6
+Approximate root = 147.0278251776
+Function value = 0.0000000000
+Norm(x(k)-x(k-1)) = 0.0000002507
+------------------------------------------------------------------
+Solving Problem F(c) : x0=140, x1=150, l = 89, h = 49, D = 55, beta1 = 11.5
+--------------------Using Secant Method---------------------------
+Using Secant Method:
+Iteration times = 5
+Approximate root = 147.0278251767
+Function value = 0.0000000004
+Norm(x(k)-x(k-1)) = 0.0000092565
+------------------------------------------------------------------
+Solving Problem F(c) : x0=150, x1=160, l = 89, h = 49, D = 55, beta1 = 11.5
+--------------------Using Secant Method---------------------------
+Using Secant Method:
+Iteration times = 7
+Approximate root = 147.0278251356
+Function value = 0.0000000200
+Norm(x(k)-x(k-1)) = 0.0001032280
+------------------------------------------------------------------

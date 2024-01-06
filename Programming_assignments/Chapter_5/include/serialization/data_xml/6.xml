@@ -1,0 +1,28 @@
+<serialization>
+    <std_map>
+        <Element0>
+            <key>
+                <i>1</i>
+            </key>
+            <value>
+                <std_string>one</std_string>
+            </value>
+        </Element0>
+        <Element1>
+            <key>
+                <i>2</i>
+            </key>
+            <value>
+                <std_string>two</std_string>
+            </value>
+        </Element1>
+        <Element2>
+            <key>
+                <i>3</i>
+            </key>
+            <value>
+                <std_string>three</std_string>
+            </value>
+        </Element2>
+    </std_map>
+</serialization>

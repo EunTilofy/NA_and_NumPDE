@@ -1,0 +1,34 @@
+<serialization>
+    <std_list>
+        <Element0>
+            <std_pair>
+                <first>
+                    <i>1</i>
+                </first>
+                <second>
+                    <std_string>one</std_string>
+                </second>
+            </std_pair>
+        </Element0>
+        <Element1>
+            <std_pair>
+                <first>
+                    <i>2</i>
+                </first>
+                <second>
+                    <std_string>two</std_string>
+                </second>
+            </std_pair>
+        </Element1>
+        <Element2>
+            <std_pair>
+                <first>
+                    <i>3</i>
+                </first>
+                <second>
+                    <std_string>three</std_string>
+                </second>
+            </std_pair>
+        </Element2>
+    </std_list>
+</serialization>

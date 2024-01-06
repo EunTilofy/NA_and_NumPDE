@@ -1,0 +1,361 @@
+%!TEX program = xelatex
+% 完整编译: xelatex -> biber/bibtex -> xelatex -> xelatex
+\documentclass[lang=cn,a4paper,newtx,bibend=bibtex]{elegantpaper}
+
+\title{Problems of Chapter 6}
+\author{张志心 \ 混合2106}
+
+\date{\zhdate{2023/12/28}}
+
+% \qedhere to make the square straight after
+
+\usepackage{array}
+\usepackage{tcolorbox}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{float}
+\usepackage{bm}
+\usepackage{amsmath}
+\usepackage{extarrows}
+
+\newtcolorbox{prob}[1][]{
+  colframe=gray,
+  colback=white,
+  boxrule=1.5pt, % 控制外边框线的宽度
+  sharp corners, % 使用直角边框
+  fonttitle=\bfseries,
+  title=#1
+}
+
+\newcommand{\ccr}[1]{\makecell{{\color{#1}\rule{1cm}{1cm}}}}
+\newcommand{\longeq}[2]{\xlongequal[#2]{#1}}
+\newcommand{\xB}{\bm{x}}
+\newcommand{\yB}{\bm{y}}
+\newcommand{\gB}{\bm{g}}
+\newcommand{\uB}{\bm{u}}
+\newcommand{\vB}{\bm{v}}
+\newcommand{\wB}{\bm{w}}
+\newcommand{\wanwan}[1]{\tilde{#1}}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\RBB}{\mathbb{R}}
+\newcommand{\CBB}{\mathbb{C}}
+\newcommand{\FBB}{\mathbb{F}}
+\newcommand{\FM}{\mathcal{F}}
+\newcommand{\SM}{\mathcal{S}}
+\newcommand{\LM}{\mathcal{L}}
+\newcommand{\VM}{\mathcal{V}}
+\newcommand{\CM}{\mathcal{C}}
+\newcommand{\bigsum}[2]{\sum\limits_{#1}^{#2}}
+\newcommand{\bigprod}[2]{\prod\limits_{#1}^{#2}}
+\newcommand{\upset}[2]{\stackrel{#1}{#2}}
+\newcommand{\domf}{\textrm{dom}\;f}
+\newcommand{\Int}[4]{\int_{#1}^{#2}{#3}{\dd {#4}}}
+\newcommand{\indot}[2]{\langle {#1}, {#2} \rangle}
+\newcommand{\functiontype}[3]{\FM_{#1}^{#2,#3}(\RBB^n)}
+\newcommand{\normgen}[1]{\left\| #1 \right\|}
+\newcommand{\strongconvextype}[2]{\SM_{#1}^{#2}(\RBB^n)}
+\newcommand{\argmin}{\mathop{\rm argmin}}
+
+\pgfplotsset{compat=1.17}
+
+\addbibresource[location=local]{reference.bib}
+
+\begin{document}
+
+\maketitle
+
+\begin{prob}[6.6.1-\textrm{I}~~~Simpson's rule.]
+\begin{enumerate}
+  \item[(a)] Show that Simpson's rules on $[-1, 1]$ can be obtained by 
+  \[\int_{-1}^1 y(t)\dd t = \int_{-1}^1 p_3(y; -1, 0, 0, 1; t)\dd t + E^S(y),\]
+  where $y \in \CM^4[-1, 1]$ and $p_3(y; -1, 0, 0, 1; t)$ is the interpolation
+  polynomial of $y$ that satisfies $p_3(-1) = y(-1), p_3(0) = y(0), p_3\prime(0) = y\prime(0)$,
+  and $p_3(1) = y(1)$.
+  \item[(b)] Derive $E^S(y)$.
+  \item[(c)] Using (a), (b), and a change of variable, derive the
+  composite Simpson's rules and prove the theorem on its error estimation.  
+\end{enumerate}
+\end{prob}
+
+\begin{solution}~~
+
+  \begin{enumerate}
+    \item[(a)]
+    \begin{equation*}
+    \begin{aligned}
+    &\Int{-1}{1}{P_3(y; -1, 0, 0, -1; t)}{t} \\
+    =& \Int{-1}{1}{\left[y(-1)+y[-1, 0](t+1) + y[-1, 0, 0]t(t+1) + y[-1, 0, 0, 1](t+1)^2t\right]}{t} \\
+    =& 2y(-1)+2\left(y(0) - y(-1)\right) +\frac23 \left(y'(0)-y(0)+y(1)\right) + \frac23\cdot\frac12 \left(y(1)-2y'(0)-y(-1)\right) \\
+    =& \frac13 \left(y(-1)+4y(0)+y(1)\right) = I^S(y).
+    \end{aligned} 
+    \end{equation*}
+    \item[(b)]
+    \[E^S(y) = \Int{-1}{1}{y(t)}{t} - \frac13 \left(y(-1) + 4y(0) + y(1)\right).\]
+    \item[(c)]  
+    \begin{equation*}
+    \begin{aligned}
+      I_n^S(y) &= \Int{x_0}{x_2}{P_3(y; x_0, x_1, x_1, x_2; t)}{t} + \Int{x_2}{x_4}{P_3(y; x_2, x_3, x_3, x_4)}{t} + \cdots \\
+      &~~~~ \Int{x_{n-2}}{x_n}{P_3(y; x_{n-2}, x_{n-1}, x_{n-1}, x_n)}{t} \\
+      &\longeq{h = x_1 - x_0 = x_2 - x_1}{} \frac{h}3 (y(x_0) + 4y(x_1) + y(x_2)) + \frac{h}3 (y(x_2)+4y(x_3)+4y(x_4)) + \cdots \\
+      &~~~~~~~~~~~~~~~~~~~~~~~~+ \frac{h}3 (y(x_{n-2}+4y(x_{n-1})+y(x_n))) \\
+      &= \frac{h}3 (y(x_0) + 4y(x_1) + 2y(x_2) + 4y(x_3) + \cdots + 4y(x_{n-2}) + y(x_n)).
+    \end{aligned}
+    \end{equation*}
+    这与 Def 6.19 中给出的公式相同。
+
+    \begin{equation*}
+    \begin{aligned}
+      E^S(y) &= \Int{-1}{1}{\left[y(t)-P_3(y;-1,0,0,1;t)\right]}{t} 
+      \longeq{Thm 2.37}{} \Int{-1}{1}{\dfrac{f^{(4)}(\xi(t))}{24}t^2(t-1)(t+1)}{t}
+      \\&= -\Int{-1}{1}{
+        \dfrac{f^{(4)}(\xi(t))}{24} t^2(1-t)(t+1)
+      }{t} = -\dfrac{f^{(4)(\xi)}}{24} \Int{-1}{1}{t^2(1-t)(1+t)}{t}\\
+      &= -\dfrac{f^{(4)}(\xi)}{24} \times \dfrac4{15} = -\dfrac{f^{(4)}(\xi)}{90} \\
+      E_n^S(y) &= \bigsum{k = 0}{\frac{n}2 - 1} - \dfrac{f^{(4)}(\xi_k)}{90}\cdot h^5 = -\dfrac{f^{(4)}(\xi)}{90}\cdot h^5 \cdot \frac{n}2 = - \dfrac{b - a}{180} h^4 f^{(4)}(\xi).
+    \end{aligned}
+    \end{equation*}
+  \end{enumerate}
+\end{solution}
+
+
+\begin{prob}[6.6.1-\textrm{II}]
+  Estimate the number of subintervals required to approximate
+  $\Int{0}{1}{e^{-x^2}}{x}$ to six correct decimal places, i.e. the absolute
+  error is less than $0.5\times 10^{-6}$,
+  \begin{enumerate}
+    \item[(a)] by the composite trapezoidal rule,
+    \item[(b)] by the composite Simpson's rule. 
+  \end{enumerate}
+\end{prob}
+
+\begin{solution}
+  \[I = \Int{0}{1}{e^{-x^2}}{x} \approx 0.746824133\]
+  本题求解代码如下：
+  \begin{lstlisting}[language=C++]
+#include<bits/stdc++.h>
+using namespace std;
+double f(double x) { return exp(-x*x); }
+int main() {
+    double I = 0.746824133;
+    auto solveA = [&](){
+        for(int N = 1; N <= 1000; ++N) {
+            double h = 1.0 / N, tmp = 0.5*(f(0) + f(1));
+            for(int i = 1; i < N; ++i) tmp += f(i*h); tmp /= N;
+            if(fabs(tmp-I) < 5e-7) {
+                cout << "Need " << N << " subintervals.->I_N^T = " << fixed << setprecision(9) << tmp << ".\n";
+                break;
+            }
+        }
+    };
+    auto solveB = [&](){
+        for(int N = 1; N <= 1000; ++N) {
+            double h = 1.0 / N, double tmp = f(0) + f(1);
+            for(int i = 1; i < N; ++i) tmp += ((i&1)?4:2)*f(i*h); tmp/=N*3;
+            if(fabs(tmp-I) < 5e-7) {
+                cout << "Need " << N << " subintervals.->I_N^S = " << fixed << setprecision(9) << tmp << ".\n";
+                break;
+            }
+        }
+    };
+    solveA(); solveB();
+}
+  \end{lstlisting}
+  输出结果为：
+  \begin{lstlisting}
+    Need 351 subintervals.->I_N^T = 0.746823635.
+    Need 12 subintervals.->I_N^S = 0.746824526.
+  \end{lstlisting}
+  \begin{enumerate}
+  
+    \item[(a)]
+  \[I_n^T(f) = h\left(\frac12 f(0) + f(h) + f(2h) + \cdots + f((n - 1)h) + \frac12f(1)\right)\] 
+  \[I_{351}^{T} \approx 0.746823635,\quad E_{351}^{T} \approx 4.98\times 10^{-7}.\]
+    所以至少需要 351 个子区间。
+  \item[(b)] 
+  \[I_n^T(f) = \frac{h}3\left(f(0) + 4f(h) + 2f(2h) + \cdots + f(1)\right)\] 
+  \[I_{12}^{T} \approx 0.746824526,\quad E_{12}^{T} \approx 4.13\times 10^{-7}.\]
+    所以至少需要 12 个子区间。
+  \end{enumerate}
+\end{solution}
+
+\begin{prob}[6.6.1-\textrm{III}~~~Gauss-Laguerre quadrature formula]
+\begin{enumerate}
+  \item[(a)] Construct a polynomial $\pi_2(t) = t^2 + at + b$ that is orthogonal to $\mathbb{P}_1$
+  with respect to the weght function $\rho(t) = e^{-t}$, i.e.
+  \[\forall p \in \mathbb{P}_1, \Int{0}{+\infty}{p(t)\pi_2(t)\rho(t)}{t} = 0.\]
+  (hint : $\Int{0}{+\infty}{t^me^{-t}}{t} = m!$)
+  \item [(b)] Derive the two-point Gauss-Laguerre quadrature formula
+  \[\Int{0}{+\infty}{f(t)e^{-t}}{t} = w_1f(t_1) + w_2f(t_2) + E_2(f)\]
+  and express $E_2(f)$ in terms of $f^{(4)}(\tau)$ for some $\tau > 0$.
+  \item[(c)] Apply the formula in (b) to approximate
+  \[I = \Int{0}{+\infty}{\frac1{1+t}e^{-t}}{t}.\]
+  Use the remainder to estimate the error and compare your estimate with the true error.
+  With the true error, identify the unknown quantity $\tau$ contained in $E_2(f)$.
+
+  (hint : use the exact value $I = 0.596347361\cdots$)
+\end{enumerate}
+\end{prob}
+
+\begin{solution}~~
+
+  \begin{enumerate}
+    \item[(a)]
+    \[\Int{0}{+\infty}{\pi_2(t)\rho(t)}{t} = \Int{0}{+\infty}{(t^2+at+b)e^{-t}}{t} = 2+a+b = 0\]
+    \[\Int{0}{+\infty}{\pi_2(t)\rho(t)t}{t} =\Int{0}{+\infty}{(t^2+at+b)te^{-t}}{t} = 6+2a+b = 0\]
+    \[\Rightarrow a = -4, b = 2, \pi_2(t) = t^2 - 4t + 2.\]
+    \item[(b)]
+    \[\pi_2(t) = t^2 - 4t + 2 = 0 \Rightarrow t_1 = 2-\sqrt{2}, t_2 = 2+\sqrt{2}.\]
+    \[I(1) = I_2(1) \Rightarrow w_1 + w_2 = \Int{0}{\infty}{\rho(\tau)}{t} = \Int{0}{+\infty}{e^{-t}}{t} = 1.\]
+    \[I(t) = I_2(t) \Rightarrow w_1t_1 + w_2t_2 = \Int{0}{+\infty}{t\rho(t)}{t} = \Int{0}{+\infty}{te^{-t}}{t} = 1.\]
+    \[\Rightarrow w_1 = \dfrac{2+\sqrt{2}}{4}, w_2 = \dfrac{2-\sqrt{2}}{4}.\]
+    \[\Int{0}{+\infty}{f(t)e^{-t}}{t} = \dfrac{2+\sqrt{2}}{4}f(2-\sqrt{2}) + \dfrac{2-\sqrt{2}}{4}f(2+\sqrt{2})+E_2(f).\]
+    \[E_2(f) = \dfrac{f^{(4)}(\tau)}{24} \Int{0}{+\infty}{e^{-t}(t^2-4t+2)^2}{t} =\dfrac{f^{(4)}(\tau)}{6}.\]
+    \item[(c)] 
+    \[I_2(f) = \dfrac{2+\sqrt{2}}{4} \cdot \dfrac{1}{1+2-\sqrt{2}} + \dfrac{2 - \sqrt{2}}{4} \cdot\dfrac{1}{1+2+\sqrt{2}} = \dfrac{4}7 \approx 0.571428571.\]
+    \[E_2(f) = I(f) - I_2(f) \approx 0.024918790.\]
+    \[f^{(4)}(t) = \left(\dfrac{1}{1+t}\right)^{(4)} = \dfrac{24}{(1+t)^5}\]
+    \[\dfrac{24}{6(1+\tau)^5} = E_2(f) \Rightarrow \tau \approx 1.76126.\]
+  \end{enumerate}
+\end{solution}
+
+\begin{prob}[6.6.1-\textrm{IV}~~~Remainder of Gauss formulas]
+  Consider the Hermite interpolation problem: find $p\in \mathbb{P}_{2n - 1}$ such that
+  \[\forall m = 1, 2, \cdots, n, p(x_m) = f_m, p'(x_m) = f_m'.\quad\quad\quad(6.44)\]
+  There are \textit{elementary Hermite interpolation polynomials} $h_m, q_m$ such that
+  the solution of (6.44) can be expressed in the form 
+  \[p(t) = \sum_{m = 1}^n [h_m(t)f_m + q_m(t)f_m'],\]
+  analogous to the Lagrange interpolation formula.
+  \begin{enumerate}
+    \item[(a)] Seek $h_m$ and $q_m$ in the form
+    \[h_m(t) = (a_m + b_m t)\ell^2_m(t), q_m(t) = (c_m + d_m t) \ell_m^2(t)\]
+    where $\ell_m$ is the elementary Lagrange polynomial in (2.9).
+    Determine the constants $a_m, b_m, c_m, d_m$.
+    \item[(b)] Obtain the quadrature rule
+    \[I_n(f) = \sum_{k = 1}^{n} [w_kf(x_k) + \mu_k f'(x_k)]\]
+    that satisfies $E_n(p) = 0$ for all $p \in \mathbb{P}_{2n - 1}$.
+    \item[(c)] What conditions on the node polynomial or on the nodes $x_k$ must be
+    imposed so that $\mu_k = 0$ for each $k = 1, 2, \cdots, n$?  
+  \end{enumerate}
+\end{prob}
+
+\begin{solution}~~
+
+  \begin{enumerate}
+    \item[(a)] 
+    \begin{equation*}
+    \begin{aligned}
+      p(x_m) &= \sum_{k = 1}^n\left[h_k(x_m)f_k+q_k(x_m)f_k'\right] = \sum_{k = 1}^n \left[(a_k+b_kx_m)f_k + (c_k +d_kx_m)f_k'\right]\ell_k^2(x_m) \\
+      &= (a_m+b_mx_m)f_m + (c_m+d_mx_m)f_m' = f_m \\
+      p'(x_m) &= \sum_{k = 1}{n}\left[h_k'(x_m)f_k + q_k'(x_m)f_k'\right] \\
+      &= \sum_{k = 1}^n\left[(b_kf_k + d_kf_k')\ell_k(x_m)+[(a_k+b_kx_m)f_k + (c_k+d_kx_m)f_k']2\ell_k'(x_m)\right]\ell_k(x_m) \\
+      &= (b_mf_m + d_mf_m') + 2\left[(a_m+b_mx_m)f_m + (c_m+d_mx_m)f_m'\right]\cdot \sum_{i\neq m}\dfrac{1}{x_m - x_i} = f_m' \\
+    \end{aligned}
+  \end{equation*}
+  \begin{equation*}
+    \begin{aligned}
+      &\Rightarrow \begin{cases}
+      a_m + x_m b_m = 1 \\
+      c_m + x_m d_m = 0 \\
+      2(a_m + x_m b_m) \ell_m'(x_m) + b_m = 0\\
+      2(c_m + x_m d_m) \ell_m'(x_m) + d_m = 1
+      \end{cases}
+      \Rightarrow \begin{cases}
+      a_m = 1 + 2x_m\ell_m'(x_m) \\
+      b_m = -2\ell_m'(x_m) \\
+      c_m = -x_m \\
+      d_m = 1
+      \end{cases}
+      (l_m'(x_m) = \sum_{i\neq m}\dfrac{1}{x_m - x_i})
+    \end{aligned}
+    \end{equation*}
+    \item[(b)]
+    令 $I_n(f) = \Int{a}{b}{p(t)}{t} = \sum_{k = 1}^{n}\left[w_kf(x_k) + \mu_kf'(x_k)\right]$.
+    
+    其中，$w_k = \Int{a}{b}{h_k(t)}{t} = \Int{a}{b}{\left[1+2(x_k-t)\ell_k'(x_k)\right]\ell_k^2(t)}{t}$，
+    $\mu_k = \Int{a}{b}{q_k(t)}{t} = \Int{a}{b}{(t-x_k)\ell_k^2(t)}{t}$。
+    
+    因为 $p(t)$ 是对 $f$ 的 $2n-1$ 次 Hermite 插值，所以对 $p\in \mathbb{P}_{2n-1}, p(t)\equiv f.$ 
+    
+    即 $\forall p\in \mathbb{P}_{2n-1}, E_n(p) = 0.$
+    \item[(c)]
+    需满足：
+    \[\forall k, \mu_k = \Int{a}{b}{(t-x_k)\ell_k^2(t)}{t} = \Int{a}{b}{\dfrac{V_n^2(t)}{t-x_k}}{t} = 0.\]
+  \end{enumerate}
+\end{solution}
+
+\begin{prob}[6.6.1-\textrm{V}]
+  Prove Lemma 6.43.
+  \begin{prob}
+    In approxmating the second derivative of $u\in \CM^4(\RBB)$, the formula
+    \[D^2u(\overline{x}) = \dfrac{u(\overline{x} - h) - 2u(\overline{x}) + u(\overline{x} + h)}{h^2}\]
+    is second-order accurate. Furthermore, if the input function values $u(\overline{x} - h)$, $u(\overline{x})$,
+    and $u(\overline{x} + h)$ are perturbed with random errors $\epsilon \in [-E, E]$, then there exists $\xi \in [\overline{x} - h, \overline{x} + h]$
+    such that
+    \[ | u''(\overline{x}) - D^2u(\overline{x}) | \le \dfrac{h^2}{12} |u^{(4)}(\xi)|+\dfrac{4E}{h^2}.\]
+  \end{prob}
+  How do you choose $h$ to minimize the error bound in (6.43)?
+  Design a fourth-order accurate formula based on a symmetric stencil, derive its
+  error bound, and minimize the error bound. What do you observe in comparing the second-order
+  case and the fourth-order case?
+\end{prob}
+
+\begin{proof}~~
+
+\begin{enumerate}
+\item 
+\begin{equation*}
+\begin{aligned}
+  D^2 u(\overline{x}) &= \dfrac{u(\overline{x} - h) - 2u(\overline{x}) + u(\overline{x}+h)}{h^2} \\
+  &= \dfrac{1}{h^2}[u(\overline{x}) - hu'(\overline{x}) + \frac{h^2}2 u''(\overline{x}) - \frac{h^3}6 u'''(\overline{x}) + \frac{h^4}{24} u^{(4)}(\overline{x}) - \frac{h^5}{120}u^{(5)}(\overline{x}) - 2u(\overline{x}) \\
+  &~~~ + u(\overline{x}) + hu'(\overline{x}) + \frac{h^2}{2} u''(\overline{x}) + \frac{h^3}6 u'''(\overline{x}) + \frac{h^4}{24} u^{(4)}(\overline{x}) + \frac{h^5}{120} u^{(5)}(\overline{x}) + O(h^6)] \\
+  &= u''(\overline{x}) + \frac{h^2}{12} u^{(4)}(\overline{x}) + O(h^{(4)}).
+\end{aligned}
+\end{equation*}
+
+所以 $|u''(\overline{x}) - D^2 u(\overline{x})| = \frac{h^2}{12} |u^{(4)} (\xi)|, \quad \xi \in (\overline{x}- h, \overline{x}+h)$。
+
+当 $u$ 的计算存在误差 $\varepsilon\in [-E, E]$ 时，
+\[|u''(\overline{x}) - D^2 \wanwan{u}(\overline{x})| \le |u''(\overline{x}) - D^2 u(\overline{x})| + |D^2 u(\overline{x}) - D^2 \wanwan{u}(\overline{x}) | \le \dfrac{h^2}{12} |u^{(4)}(\xi)| + \dfrac{4E}{h^2}. \] 
+
+\item 取 $h = \left(\dfrac{|u^{(4)}(\overline{x})|}{12}\cdot 4E\right)^{\frac14} = \left(\dfrac{E|u^{(4)}(\overline{x})|}{3}\right)^{\frac14}$，误差上界为 $2\left(\dfrac{E\cdot \max_{x\in [\overline{x} - h, \overline{x} + h]}|u^{(4)}(x)|}{3}\right)^{\frac12}$。
+
+\item 设 
+\begin{equation*}
+\begin{aligned}
+D_2^2 u(\overline{x}) &= \dfrac{Au(\overline{x} - 2h) + Bu(\overline{x} - h) + Cu(\overline{x}) + Bu(\overline{x} + h) + Au(\overline{x}+ 2h)}{h^2} \\
+&= \dfrac1{h^2} \left[(2A+2B+C)u(\overline{x})+(4A+B)h^2u''(\overline{x})+\frac1{12}(16A+B)h^4u^{(4)}(\overline{x}) + \frac1{360}(64A+B)h^6u^{(6)}(\overline{x}) + O(h^8)\right]
+\end{aligned}
+\end{equation*}
+
+所以 $\begin{cases}
+2A + 2B + C = 0 \\
+4A + B = 0\\
+16A + B = 0
+\end{cases} \Rightarrow \begin{cases}
+A = -\frac1{12} \\
+B = \frac43 \\
+C = -\frac52
+\end{cases}
+$
+
+即 $D_2^2 u(\overline{x}) = \dfrac{-u(\overline{x} - 2h) + 16u(\overline{x} - h) - 30 u(\overline{x}) + 16u(\overline{x} + h) - u(\overline{x} + 2h)}{12h^2}$ 
+
+$D_2^2 u(\overline{x}) = u''(\overline{x}) + \dfrac{h^4}{360} (64A + B) u^{(6)}(\overline{x}) = u''(\overline{x}) - \dfrac{h^4}{90} u^{(6)} (\overline{x}) + O(h^{(6)}).$
+
+当 $u$ 的计算存在误差 $\varepsilon \in [-E, E]$ 时，
+\[|u''(\overline{x}) - D_2^2\wanwan{u} (\overline{x})| \le \frac{h^4}{90} |u^{(6)}(\xi)| + \dfrac{16E}{3h^2}. \quad \xi \in (x - 2h, x+2h).\]
+
+取 $h = \left(\dfrac{|u^{(6)}(\overline{x})|}{90} \cdot \dfrac{16E}{3} \cdot \dfrac12\right)^{\frac16} = \left(\dfrac{4E|u^{(6)}(\overline{x})|}{135}\right)^{\frac16}$, 误差上界为 $3\left(\dfrac{640E^2}{|u^{(6)}(\overline{x})|}\right)^{\frac13}$。
+
+\item 
+\begin{enumerate}
+\item 四阶精度的误差上界只在二阶精度的 $O(E^{\frac12})$ 基础上提升到 $O(E^{\frac23})$；
+\item 二阶精度公式的误差上界和 $u$ 的高阶导数正相关，但四阶精度公式误差上界和 $u$ 的高阶导数负相关。
+\end{enumerate}
+\end{enumerate}
+\end{proof}
+
+\nocite{*}
+\printbibliography[heading=bibintoc, title=\ebibname]
+
+\end{document}

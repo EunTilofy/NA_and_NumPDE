@@ -1,0 +1,7 @@
+{
+    "function" : "1/(1+25*x*x)",
+    "N" : [6, 11, 21, 41, 81],
+    "Interval" : [-1, 1],
+    "Type" : ["linear", "CompleteCubic", "NatureCubic", "SecondDerivativesCubic"],
+    "Cond" : [[], [0.07396449704142012, -0.07396449704142012], [], [0.06827492034592626, 0.06827492034592626]]
+}

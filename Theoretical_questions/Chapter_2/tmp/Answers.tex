@@ -1,0 +1,370 @@
+%!TEX program = xelatex
+% 完整编译: xelatex -> biber/bibtex -> xelatex -> xelatex
+\documentclass[lang=cn,a4paper,newtx,bibend=bibtex]{elegantpaper}
+
+\title{Theoretical Questions of Chapter 2}
+\author{张志心 \ 混合2106}
+
+\date{\zhdate{2023/10/09}}
+
+% \qedhere to make the square straight after
+
+\usepackage{array}
+\usepackage{tcolorbox}
+\usepackage{tikz}
+\usepackage{pgfplots}
+
+\newtcolorbox{prob}[1][]{
+  colframe=gray,
+  colback=white,
+  boxrule=1.5pt, % 控制外边框线的宽度
+  sharp corners, % 使用直角边框
+  fonttitle=\bfseries,
+  title=#1
+}
+
+\newcommand{\ccr}[1]{\makecell{{\color{#1}\rule{1cm}{1cm}}}}
+
+\addbibresource[location=local]{reference.bib}
+
+\begin{document}
+
+\maketitle
+
+
+
+\begin{prob}[2.9.1-\textrm{I}.]
+For $f\in \mathcal{C}^2[x_0, x_1]$ and $x\in (x_0, x_1)$, linear interpolation of $f$ at $x_0$ and $x_1$
+yields
+\[
+    f(x) - p_1(f; x) = \dfrac{f''(\xi(x))}{2}(x-x_0)(x-x_1).
+\]
+Consider the case $f(x)=\frac{1}{x},\;x_0=1,\;x_1=2$.
+  \begin{itemize}
+    \item Determine $\xi(x)$ explicity.
+    \item Extend the domain of $\xi$ continuously from $(x_0,x_1)$ to $[x_0,x_1]$. Find $\max \xi(x)$, $\min \xi(x)$ and
+    
+    $\max f''(\xi(x))$.
+  \end{itemize}
+
+\end{prob}
+
+\begin{solution}
+\begin{itemize}
+\item 线性插值结果为 $p_1(f;x) = \frac{1 - \frac12}{1 - 2}(x - 1) + 1 = -\frac12 x + \frac32$, 因为 $f(x) = \frac1x$, $f''(x) = \frac{2}{x^3}$， 所以
+\[f(x) - p_1(f; x) = \frac1x + \frac12 x - \frac32 =  \dfrac{f''(\xi(x))}{2}(x-x_0)(x-x_1)=\xi^{-3}(x)(x-1)(x-2).\]
+\[\dfrac{(x-1)(x-2)}{2x} = \frac{(x-1)(x-2)}{\xi^3(x)}.\]
+所以 $\xi(x) = (2x)^{\frac13}$。
+\item 由于 $\xi(x)$ 在 $[x_0, x_1] = [1, 2]$ 上单调递增，所以
+ \[\max \xi(x) = \xi(2) = \sqrt[3]{4}, ~~~~~ \min \xi(x) = \xi(1) = \sqrt[3]{2}\]
+ 由于 $f''(\xi(x)) = 2\left(\sqrt[3]{2x}\right)^{-3} = \frac1x$，在 $[1, 2]$ 单调递减，所以
+ \[\max f''(\xi(x)) = \frac11 = 1.\]
+\end{itemize}
+\end{solution}
+
+\begin{prob}[2.9.1-\textrm{II}.]
+    Let $\mathbb{P}_m^+$ be the set of all polynomials of degree 
+    $\leq m$ that are non-negative on the real line,
+    \begin{equation*}
+      \mathbb{P}_m^+ = \{p:p\in \mathbb{P}_m,\; \forall x\in \mathbb{R}, \; p(x)\geq 0\}.
+    \end{equation*}
+    Find $p\in \mathbb{P}_{2n}^+$ such that $p(x_i)=f_i$ for $i=0,1,\ldots,n$ where $f_i\ge 0$ 
+    and $x_i$ are distinct points on $\mathbb{R}$.  
+\end{prob}
+
+\begin{solution}
+设 $p_n(f; x)$ 为在 $x_0, x_1, \cdots, x_n$ 点的插值多项式，满足
+\[\forall i = 0, \cdots, n, p_n(f; x_i) = \sqrt{f_i},\]
+那么令 $p(x) = p_n^2(f; x)$， 则有 $\forall x \in \mathbb{R}, p(x) \ge 0$, 并且对于 $i = 0, \cdots, n, $, $p(x_i) = f_i$。具体的，
+\[
+  p(x) = \left(\sum_{i = 0}^n \sqrt{f_i} \prod_{j = 0, j \neq i}^n \dfrac{x - x_j}{x_i - x_j}\right)^2.
+\]
+\end{solution}
+
+\begin{prob}[2.9.1-\textrm{III}.]
+Cnosider $f(x)=e^x$.
+  \begin{itemize}
+    \item Prove by induction that
+    \begin{equation*}
+      \forall t\in \mathbb{R}, \qquad f[t,t+1,\ldots,t+n]=\frac{(e-1)^n}{n!}e^t.
+    \end{equation*}
+    \item From Corollary 2.22 we know
+    \begin{equation*}
+      \exists \xi\in(0,n) \; \text{s.t.} \; f[0,1,\ldots,n]=\frac{1}{n!}f^{(n)}(\xi).
+    \end{equation*}
+    Determine $\xi$ from the above two equations. Is $\xi$ located to the left 
+    or to the right of the midpoint $n/2$?
+  \end{itemize}
+\end{prob}
+
+\begin{solution}
+\begin{itemize}
+  \item 当 $n = 0$ 时，$f[t] = f(t) = e^t = \dfrac{(e - 1)^n}{n!}e^t$，归纳法，
+若 $f[t, t + 1, \cdots, t + n - 1] = \dfrac{(e - 1)^{n - 1}}{(n - 1)!} e^t, \forall t \in \mathbb{R}$，
+那么
+\begin{equation*}
+\begin{aligned}
+  f[t, t + 1, \cdots, t + n] &= \dfrac{f[t + 1, t + 2, \cdots, t + n] - f[t, t + 1, \cdots, t + n - 1]}{(t + n) - t} \\
+  &=\dfrac{\frac{(e - 1)^{n - 1}}{(n - 1)!}e^{t + 1} - \frac{(e - 1)^{n - 1}}{((n - 1)!)}e^t}{n} = \dfrac{(e - 1)^n e^t}{n!}
+\end{aligned}
+\end{equation*}
+所以结论成立。
+\item $e^{\xi} = (e - 1)^n$， 所以 $\xi = n \ln (e - 1)$，因为 $\ln(e - 1)= 0.5413\ldots > \frac12$， 所以 $\xi$ 在中点右侧。
+\end{itemize}
+\end{solution}
+
+\begin{prob}[2.9.1-\textrm{IV}.]
+    Consider $f(0)=5,\; f(1)=3,\; f(3)=5,\; f(4)=12$.
+  \begin{itemize}
+    \item Use the Newton's formula to obtain $p_3(f;x)$;
+    \item The data suggests that $f$ has a minimum in $x\in(1,3)$. Find an approximate value for the location $x_\text{min}$ of the minimum.
+  \end{itemize}
+\end{prob}
+
+\begin{solution}
+\begin{itemize}
+\item 根据 Newton's formula 计算差商表如下：
+\begin{tabular}{c|cccc}
+   &  &  &  & \\
+  \hline
+  \textbf{0} & 5 & & & \\
+  \textbf{1} & 3 & -2 & &  \\
+  \textbf{2} & 5 & 1 & 1 & \\
+  \textbf{3} & 12 & 7 & 2 & $\frac14$ \\
+  \end{tabular}
+
+
+所以  $p_3(f; x) = 5 - 2x + x(x - 1) + \frac14x(x-1)(x -3) = \frac14x^3 - \frac94x + 5$。
+
+\item $p'_3(f; x) = \frac34x^2 - \frac94 = 0 \Rightarrow x = \sqrt{3}$， 此时 $f''_3(f; \sqrt{3}) = \frac{2\sqrt{3}}{2} \ge 0$，
+所以 $x_min = \sqrt{3} \approx 1.732$。
+\end{itemize}
+\end{solution}
+
+\begin{prob}[2.9.1-\textrm{V}.]
+    Consider $f(x)=x^7$.
+    \begin{itemize}
+      \item Compute $f[0,1,1,1,2,2]$.
+      \item We konw that this devided difference is expressible in terms of the $5$th derivative of $f$ evaluated at some $\xi\in(0,2)$. Determine $\xi$.
+    \end{itemize}
+\end{prob}
+
+\begin{solution}
+  \begin{itemize}
+  \item $f(0) = 0, f(1) = 1, f'(1) = -1, \frac{f''(1)}{2} = 21, f(2) = 128, f'(2) = 448,$。
+
+  根据 Newton's formula 计算差商表如下：
+  \begin{tabular}{c|cccccc}
+     &  &  &  &  & & \\
+    \hline
+    \textbf{0} & 0 & & & & &\\
+    \textbf{1} & 1 & 1 & & & & \\
+    \textbf{1} & 1 & 7 & 6 & & &\\
+    \textbf{1} & 1 & 7 & 21 & 15 & & \\
+    \textbf{2} & 128 & 127 & 120 & 99 & 42 \\
+    \textbf{2} & 128 & 448 & 321 & 201 & 102& 30  \\
+    \end{tabular}
+  
+  
+  所以  $f[0, 1, 1, 1, 2, 2]  = 30$。
+  
+  \item $\dfrac{f^{(5)}(x)}{5!} = \dfrac{2520x^2}{120} = 21x^2$， 所以 $21\xi^2 = 30$, $\xi = \sqrt{\dfrac{10}{7}}$。
+  \end{itemize}
+  \end{solution}
+
+\begin{prob}[2.9.1-\textrm{VI}.]
+    $f$ is a function on $[0,3]$ for which one knows that
+    \begin{equation*}
+      f(0)=1,\quad f(1)=2,\quad f'(1)=-1,\quad f(3)=f'(3)=0.
+    \end{equation*}
+    \begin{itemize}
+      \item Estimate $f(2)$ using Hermite's interpolation.
+      \item Estimate the maximum possible error of the above answer if one konws, in addition, that $f\in \mathcal{C}^5[0,3]$ and $|f^{(5)}(x)|\leq M$ on $[0,3]$. Express the answer in terms of $M$.
+    \end{itemize}
+\end{prob}
+
+\begin{solution}
+  差商表计算如下：
+  \begin{tabular}{c|ccccc}
+    &  &  &  & &\\
+   \hline
+   \textbf{0} & 1 & & & &\\
+   \textbf{1} & 2 & 1 &  &  &\\
+   \textbf{1} & 2 & -1 & -2 & &\\
+   \textbf{3} & 0 & -1  & 0 & $\frac23$ &\\
+   \textbf{3} & 0 &  0 & $\frac{1}{2}$ & $\frac{1}{4}$&  $-\frac{5}{36}$ \\
+   \end{tabular}
+  
+  因此 $f(x) = 1 + x - 2x(x-1) + \dfrac 23 x(x-1)^2 - \dfrac{5}{36} x(x-1)^2(x-3)=\dfrac{36 + 147x - 155x^2 + 49x^3 - 5x^4}{36}$。
+  
+  $f(2)=\dfrac {11}{18}$。
+  
+  根据讲义 Thm 2.37，$f(x) - p_4(f;x) = \dfrac{f^{(5)}(\xi)}{5!}x(x-1)^2(x-3)^2$。
+  
+  因为 $f\in \mathcal{C}^5$ 且 $|f^{(5)}(x)|\leq M$，且
+  
+  \begin{equation*}
+    \dfrac{\text{d}}{\text{d}x}\left[x(x-1)^2(x-3)\right]^2 = (x-1)(x-3)(5x^2-12x+3)
+  \end{equation*}
+  
+  令导数为 $0$ 得到 $x=1,3,\frac{6\pm \sqrt{21}}{5}$，分别代入得 $x= \frac{6+\sqrt{21}}{5}$ 时取得最大绝对值 $\frac{48(102+7\sqrt{21})}{3125}$。
+  
+  因此 $|f(x) - p_4(f;x)| \leq \dfrac{204+14\sqrt{21}}{15625}M$。
+\end{solution}
+
+\begin{prob}[2.9.1-\textrm{VII}.]
+    Define foward difference by
+    \begin{align*}
+      \Delta f(x) = f(x+h) - f(x) ,\qquad \Delta^{k+1} f(x) = \Delta \Delta^k f(x) = \Delta^k f(x+h) - \Delta^k f(x).
+    \end{align*}
+    and backward difference by
+    \begin{align*}
+      \nabla f(x) = f(x) - f(x-h), \qquad \nabla^{k+1} f(x) = \nabla \nabla^k f(x) = \nabla^k f(x) - \nabla^k f(x-h).
+    \end{align*}
+    Prove
+    \begin{align*}
+      \Delta^k f(x) &= k!h^kf[x_0,x_1,\ldots,x_k],\\
+      \nabla^k f(x) &= k!h^kf[x_0,x_{-1},\ldots,x_{-k}],
+    \end{align*}
+    where $x_j=x+jh$.
+\end{prob}
+\begin{proof}
+  \begin{equation*}
+    \begin{aligned}
+      \Delta f(x) = f(x+h) - f(x) = hf[x,x+h]\\
+      \nabla f(x) = f(x) - f(x-h) = hf[x,x-h]
+    \end{aligned}
+    \end{equation*}
+    
+    设结论对 $k-1$ 成立，即
+    
+    \begin{equation*}
+    \begin{aligned}
+      \Delta^{k-1} f(x) = (k-1)! h^{k-1} f[x_0,x_1,\dots,x_{k-1}]\\
+      \nabla^{k-1} f(x) = (k-1)! h^{k-1} f[x_0,x_{-1},\dots,x_{-(k-1)}]
+    \end{aligned}
+    \end{equation*}
+    
+    则
+    
+    \begin{equation*}
+    \begin{aligned}
+      \Delta^k f(x) = & (k-1)! h^{k-1} f[x_1,\cdots,x_k] - (k-1)! h^{k-1} f[x_0,\cdots,x_{k-1}]\\
+      = & (k-1)! h^{k-1} (hkf[x_0,x_1,\cdots,x_k])\\
+      = & k! h^k f[x_0,x_1,\cdots,x_k].\\
+      \nabla^k f(x) = & (k-1)! h^{k-1} f[x_{-1},\cdots,x_{-k}] - (k-1)! h^{k-1} f[x_0,\cdots,x_{-(k-1)}]\\
+      = & (k-1)! h^{k-1} (hkf[x_0,x_{-1},\cdots,x_{-k}])\\
+      = & k! h^k f[x_0,x_{-1},\cdots,x_{-k}].
+    \end{aligned}
+    \end{equation*}
+    所以结论成立。
+\end{proof}
+
+\begin{prob}[2.9.1-\textrm{VIII}.]
+    Assume $f$ is differentiable at $x_0$. Prove
+    \begin{equation}
+      \frac{\partial}{\partial x_0} f[x_0,x_1,\ldots,x_n] = f[x_0,x_0,x_1,\cdots,x_n]
+    \end{equation}
+    What about the partial derivate with respect to one of the other variables?
+\end{prob}
+
+\begin{solution}
+  归纳，对 $n=0$，有 $\dfrac{\partial}{\partial x_0}f[x_0] = \dfrac{\partial}{\partial x_0}f(x_0) = f[x_0,x_0]$。
+
+  设结论对 $n=k$ 成立，即 $\dfrac{\partial}{\partial x_0}f[x_0,x_1,\cdots,x_{k-1}] = f[x_0,x_0,x_1,\cdots,x_{k-1}]$，则
+  
+  \begin{equation*}
+  \begin{aligned}
+    & \dfrac{\partial}{\partial x_0} f[x_0,x_1,\cdots,x_k]\\
+    = & \dfrac{\partial}{\partial x_0} \dfrac{f[x_1,x_2,\cdots,x_k] - f[x_0,x_1,\cdots,x_{k-1}]}{x_k-x_0}\\
+    = & \dfrac{-f[x_0,x_0,x_1,\cdots,x_{k-1}](x_k-x_0) + (f[x_1,x_2,\cdots,x_k]-f[x_0,x_1,\cdots,x_{k-1}])}{(x_k-x_0)^2}\\
+    = & -\dfrac{f[x_0,x_0,x_1,\cdots,x_{k-1}]}{x_k-x_0} + \dfrac{f[x_0,x_1,\cdots,x_k]}{x_k-x_0}\\
+    = & f[x_0,x_0,x_1,\dots,x_k].
+  \end{aligned}
+  \end{equation*}
+\end{solution}
+
+\begin{prob}[2.9.1-\textrm{IX}.$\qquad$ A min-max problem]
+    For $n\in\mathbb{N}^+$, determine
+  \begin{equation*}
+    \min \max_{x\in[a,b]} \vert a_0x^n+a_1x^{n-1}+\ldots+a_n\vert.
+  \end{equation*}
+  where $a_0\neq 0$ is fixed and the minimum is taken over all $a_i\in\mathbb{R},\;i=1,2,\cdots,n$.
+\end{prob}
+
+\begin{solution}
+  令 $t=\dfrac{x-\frac{a+b}2}{\frac{b-a}2}=\dfrac{2x-(a+b)}{b-a}$，则 $x=\dfrac{b-a}2t+\dfrac{a+b}2$。
+
+  \begin{equation*}
+  \begin{aligned}
+    p(x) = & a_0x^n+a_1x^{n-1}+\cdots+a_n\\
+    = & \sum_{j=0}^n a_j\sum_{k=0}^j \dbinom{n-j}k\left(\dfrac{b-a}{2} t\right)^k \left(\dfrac {a+b}2\right)^{n-j-k}
+  \end{aligned}
+  \end{equation*}
+  
+  记上式为 $Q(t)$，其 $t^n$ 的系数为 $a_0\left(\dfrac{b-a}2\right)^n$。
+  
+  所以根据讲义推论 2.47 得
+  
+  \begin{equation*}
+  \begin{aligned}
+    & \min \max_{x\in [a,b]} |a_0x^n+a_1x^{n-1}+\cdots+a_n|\\
+    = & \min \max_{t\in [-1,1]} Q(t)\\
+    = & |a_0|\left(\dfrac{b-a}2\right)^n\dfrac{1}{2^{n-1}} = \dfrac{|a_0|(b-a)^n}{2^{2n-1}}
+  \end{aligned}
+  \end{equation*}
+\end{solution}
+
+\begin{prob}[2.9.1-\textrm{X}.$\qquad$ Imitate the proof of Chebyshev's Theorem]
+    Express the Chebyshev polynomial of degree $n\in\mathbb{N}$ as a polynomial $T_n$ and change its domain from $[-1,1]$ to $\mathbb{R}$. For a fixed $a>1$, define $\mathbb{P}_n^a := \{p\in\mathbb{P}_n:p(a)=1\}$ and a polynomial $\hat{p}_n(x)\in\mathbb{P}_n^a$,
+    \begin{equation*}
+      \hat{p}_n(x) := \frac{T_n(x)}{T_n(a)}.
+    \end{equation*}
+    Prove
+    \begin{equation*}
+      \forall p\in \mathbb{P}_n^a,\qquad \Vert \hat{p}_n\Vert_\infty \leq \Vert p\Vert_\infty
+    \end{equation*}
+    where the max-norm of a function $f:\mathbb{R}\to\mathbb{R}$ is defined as $\Vert f\Vert_\infty = \max_{x\in[-1,1]}\vert f(x)\vert$.  
+\end{prob}
+
+\begin{proof}
+  反证，设结论不成立。因为 $T_n(x)$ 的最值是 $\pm 1$，所以 $\Vert \hat{p_n}\Vert_{\infty} = \left|\dfrac 1{T_n(a)}\right|$。
+
+  令 $Q(x) = T_n(x) - p(x)T_n(a)$，则 $Q(a) = T_n(a) - p(a)T_n(a) = 0$，即 $a$ 为 $Q$ 的一个零点。
+  
+  设 $x_k', k = 0, \cdots, n$ 为 $T_n(x)$ 的 $n + 1$ 个极值点。
+
+  又因为 $Q(x_k') = T_n(x_k') - p(x_k')T_n(a),|p(x_k')T_n(a)|<1,|T_n(x_k')|=1$，
+  
+  所以对所有奇数 $k$，$Q(x_k')<0$；对所有偶数 $k$，$Q(x_k')>0$，
+  
+  所以 $Q$ 在 $(x_0',x_1'),(x_1',x_2'),\dots,(x_{k-1}',x_k')$ 上分别有至少一个零点。$Q$ 有至少 $n+1$ 个零点。
+  
+  但 $Q$ 的次数至多为 $n$，所以 $Q(x)=0,p(x)=\dfrac{T_n(x)}{T_n(a)}$，矛盾！故原结论成立。
+\end{proof}
+
+
+\begin{prob}[2.9.1-\textrm{XI}.]
+    Prove Lemma 2.50: The Bernstein base polynomials $b_{n,k}(t) = \binom{n}{k}t^k(1-t)^{n-k}$ satisfy
+    \begin{align*}
+      \forall k=0,1,\ldots,n, \forall t\in(0,1),\quad b_{n,k}(t)&>0 \\
+      \sum_{k=0}^n b_{n,k}(t)&=1\\
+      \sum_{k=0}^n kb_{n,k}(t) &= nt\\
+      \sum_{k=0}^n (k-nt)^2b_{n,k}(t)&=nt(1-t)
+    \end{align*}
+\end{prob}
+
+\begin{proof}
+  ~~\\
+\begin{enumerate}
+\item 对任意 $k=0,1,\dots,n$ 和 $t\in (0,1)$，$t^k>0,(1-t)^k>0,\dbinom nk>0$，所以 $b_{n,k}(t)=\dbinom nk t^k(1-t)^{n-k}>0$。
+
+\item  设 $X_t\sim B(n;t)$，则 $P(X_t=k)=b_{n,k}(t)$，$\sum_{k=0}^n P(X_t=k) = 1$， 所以 $\sum_{k = 0}^n b_{n,k}(t) = 1$。
+
+\item $\sum_{k=0}^n kb_{n,k}(t) = E(X_t) = nt$
+
+\item $\sum_{k=0}^n (k-nt)^2b_{n,k}(t) = D(X_t) = nt(1-t)$。
+\end{enumerate}
+\end{proof}
+
+\end{document}
