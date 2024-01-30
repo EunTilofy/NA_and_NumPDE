@@ -1,0 +1,12 @@
+{
+   "Age" : 20,
+   "Courses" : {
+      "Abstract Algebra" : 95.0,
+      "Computer Architecture" : 95.0,
+      "Number Analysis" : 95.0,
+      "Operating System" : 95.0
+   },
+   "Name" : "EunTilofy",
+   "University" : "Zhejiang University",
+   "teammates" : [ "Antinovae", "LLL", "gym" ]
+}
