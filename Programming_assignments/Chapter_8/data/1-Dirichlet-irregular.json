@@ -1,0 +1,12 @@
+{
+   "BC_Type" : "Dirichlet",
+   "Center" : [ 0.5, 0.5 ],
+   "Domain_Border" : [ 0.0, 1.0, 0.0, 1.0 ],
+   "Domain_Type" : "Irregular",
+   "Grid_n" : 64,
+   "Need_Error" : true,
+   "R" : 0.2,
+   "answer" : "exp(sin(x)+y)",
+   "f" : "-(1-sin(x)+cos(x)*cos(x))*exp(sin(x)+y)",
+   "g" : { "all" : "exp(sin(x)+y)" }
+}

@@ -1,11 +1,11 @@
 /**********************************************************************
- * Ver 2.0 updated on Dec. 22nd, 2023, by EunTilofy
+ * Ver 2.1 updated on Dec. 22nd, 2023, by EunTilofy
  * some calculators tools to make calculation easy!
- * 1. In Ver 2.0, 
- * [ADDED] evenspace() to get linear evenly spaced points of the given interval;
- * [ADDED] get_map_list() to get a vector of values according to input.
- * [ADDED] To_string() : to convert a number to string more precisely.
- * [ADDED] Self-adaptive Simpson integral.
+ * [2.0 ADDED] evenspace() to get linear evenly spaced points of the given interval;
+ * [2.0 ADDED] get_map_list() to get a vector of values according to input.
+ * [2.0 ADDED] To_string() : to convert a number to string more precisely.
+ * [2.0 ADDED] Self-adaptive Simpson integral.
+ * [2.1 ADDED] sum(), avg(), class Point.
  * not implemented yet, to be continue ...
 ***********************************************************************/
 #ifndef _CALCULATOR_H_
@@ -29,6 +29,24 @@ void custom_assert(bool condition, const std::string& error_message) {
     }
 }
 
+template <class Type>
+double sum(const Type& x) {
+    double ret = 0;
+    for(auto item : x) {
+        ret += item;
+    }
+    return ret;
+}
+template <class Type>
+double avg(const Type& x) {
+    double ret = 0, num = 0;
+    for(auto item : x) {
+        ret += item;
+        ++num;
+    }
+    return ret/num;
+}
+
 // random number
 std::mt19937 seed(std::random_device{}());
 template <class Type> Type rand_real(const Type& l, const Type& r) {
@@ -45,21 +63,22 @@ namespace norm {
     template<class Type>
     double Norm2Vec(const Type& x) {
         double r = 0; int M = 0;
-        for(auto &y : x) r += fabs(y * y), ++M;
+        for(auto y : x) r += fabs(y * y), ++M;
         r /= M;
         return sqrt(r);
     }
     template<class Type>
     double Norm1Vec(const Type& x) {
-        double r = 0;
-        for(auto y : x) r += fabs(y);
+        double r = 0; int M = 0;
+        for(auto y : x) r += fabs(y), ++M;
+        r /= M;
         return r;
     }
     template<class Type>
     double NormiVec(const Type& x) {
         double r = 0;
         for(auto y : x) {
-            r = max(r, fabs(y));
+            r = fmax(r, (double)fabs(y));
         }
         return r;
     }
@@ -133,5 +152,12 @@ Type Simpson(const Map& f, const Type& l, const Type& r) {
 	if(fabs(s-t) < 1e-12) return s;
 	return Simpson(f, l, mid) + Simpson(f, mid, r);
 }
+
+class Point {
+public:
+    double x, y;
+    Point() : x(0), y(0) {}
+    Point(double x, double y) : x(x), y(y) {}
+};
 
 #endif

@@ -1,5 +1,5 @@
 /**********************************************************************
- * Ver 3.1 updated on Dec. 21st, 2023, by EunTilofy
+ * Ver 3.2 updated on Jan. 2nd, 2024, by EunTilofy
  * In this version, 
  * 1, use Vec instead of vector<Type>
  * 2, add RowVec, and completed a lot of new functions
@@ -10,6 +10,7 @@
  *    representing the type of the number field of vector space.
  * 7, other changes for you to find out !
  * 8, Add toVector() to class Vec.
+ * 9, Add Gause Elimination and Thomas Method to solve linear systems.
  * (!IMPORTANT!) This version is still under testing, there may remains 
  *               some problems when compiling.
 ***********************************************************************/
@@ -18,6 +19,7 @@
 
 #include <bits/stdc++.h>
 #include "IO.hpp"
+#include "calculator.hpp"
 using namespace std;
 typedef double NUM;
 
@@ -357,30 +359,8 @@ public:
         }
         return z;
     }
-    friend VecT Gauss_elimination(MatT A, VecT b) {
-        int n = A.d;
-        if(n == 0) return {};
-        assert(A.d2 == n && b.size == n);
-        for(int i = 0; i < n; ++i) {
-            int k = i;
-            for(int j = i + 1; j < n; ++j) if(fabs(A[j][i]) > fabs(A[k][i])) k = j;
-            swap(A[i], A[k]); swap(b[i], b[k]);
-            for(int j = i + 1; j < n; ++j) {
-                Type t = A[j][i] / A[i][i];
-                b[j] = b[j] - b[i] * t;
-                for(int k = i; k < n; ++k) A[j][k] = A[j][k] - A[i][k] * t;
-            }
-        }
-        VecT x(n);
-        for(int i = n-1; i >= 0; --i) {
-            x[i] = b[i];
-            for(int j = n-1; j > i; --j)
-                x[i] -= x[j] * A[i][j];
-            x[i] /= A[i][i];
-        }
-        return x;
-    }
-    REGISTER_OUTPUT(Mat, a)
+    
+    REGISTER_OUTPUT(Mat, a);
 };
 
 template<class Type, class std::enable_if<std::is_arithmetic<Type>::value>::type>
@@ -396,6 +376,53 @@ Mat<Type, Ftype> cross(const Vec<Type, Ftype>& x, const Vec<Type, Ftype>& y) {
     for(int i = 0; i < x.Size(); ++i) for(int j = 0; j < y.Size(); ++j)
         r[i][j] = x[i] * y[j];
     return r; 
+}
+
+template <class Type>
+Vec<Type> Gauss_elimination(Mat<Type> A, Vec<Type> b) {
+    int n = A.d;
+    if(n == 0) return {};
+    assert(A.d2 == n && b.size == n);
+
+    for(int i = 0; i < n; ++i) {
+        int k = i;
+        for(int j = i + 1; j < n; ++j) if(fabs(A[j][i]) > fabs(A[k][i])) k = j;
+        swap(A[i], A[k]); swap(b[i], b[k]);
+        vector<int> id;
+        for(int j = i; j < n; ++j) if(A[i][j]) id.push_back(j); // <---- optimization for speed
+        for(int j = i + 1; j < n; ++j) if(fabs(A[j][i]) > 1e-12) { // <---- optimization for speed
+            Type t = A[j][i] / A[i][i];
+            b[j] = b[j] - b[i] * t;
+            for(int k : id) A[j][k] = A[j][k] - A[i][k] * t;
+        }
+    }
+    Vec<Type> x(n);
+    for(int i = n-1; i >= 0; --i) {
+        x[i] = b[i];
+        for(int j = n-1; j > i; --j)
+            x[i] -= x[j] * A[i][j];
+        x[i] /= A[i][i];
+    }
+    return x;
+}
+
+// Tridiagonal Matrix
+template<class Type>
+Vec<Type> Thomas(Vec<Type> a, Vec<Type> b, Vec<Type> c, Vec<Type> y) {
+	int n = a.Size();
+    custom_assert((b.Size() == n - 1 && c.Size() == n - 1 && a.Size() > 0), "Invalid Size!");
+	Vec<Type> p(n), q(n-1);
+    p[0] = a[0];
+    for (int i = 1; i < n; ++ i) {
+        q[i - 1] = c[i - 1] / p[i - 1];
+        p[i] = a[i] - b[i - 1] * q[i - 1];
+    }
+    y[0] = y[0] / p[0];
+	for (int i = 1; i < n; ++ i)
+		y[i] = (y[i] - b[i-1] * y[i-1]) / p[i];
+	for (int i = n-2; i >= 0 ; -- i)
+		y[i] = y[i] - q[i] * y[i+1];
+	return y;
 }
 
 
