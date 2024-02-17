@@ -25,7 +25,8 @@ int main() {
         }
         cout << "Function Dimension : ";
         cin >> prob.Dimension;
-        cout << "Domain Border [xl, xr, yl, yr]: ";
+        cout << "Domain Border " << (prob.Dimension == 1 ? "[l, r]" : "[xl, xr, yl, yr]") << ": ";
+        prob.Domain_Border.clear();
         for(int i = 0; i < 2*prob.Dimension; ++i) {
             double x;
             cin >> x;
@@ -38,20 +39,25 @@ int main() {
             std::cout << "Not in range [2, 8192]!";
             continue;
         }
-
-        // if(prob.Domain_Type == "Irregular") {
-        //     std::cout << "Center of D [cx, cy]: ";
-        //     cin >> prob.Center.first >> prob.Center.second;
-        //     std::cout << "Radius of D: ";
-        //     cin >> prob.R;
-        // }
         
         cout << "Cycle Type [FMG or V] : ";
         cin >> prob.Cycle_Type;
-        cout << "Restriction Operator Type [linear or full_weight] : ";
+        if(prob.Cycle_Type != "FMG" && prob.Cycle_Type != "V") {
+            std::cout << "not defined!\n";
+            continue;
+        }
+        cout << "Restriction Operator Type [injection or full_weight] : ";
         cin >> prob.Restriction_opt;
+        if(prob.Restriction_opt != "injection" && prob.Restriction_opt != "full_weight") {
+            std::cout << "not defined!\n";
+            continue;
+        }
         cout << "Interpolation Operator Type [linear or quadratic] : ";
         cin >> prob.Interpolation_opt;
+        if(prob.Interpolation_opt != "linear" && prob.Interpolation_opt != "quadratic") {
+            std::cout << "not defined!\n";
+            continue;
+        }
         cout << "Max Iteration : ";
         cin >> prob.Max_Iteration;
         cout << "Accuracy : ";
@@ -62,6 +68,18 @@ int main() {
 
         if(prob.BC_Type == "mixed") {
             string type, func;
+            if(prob.Dimension == 1) {
+            for(string x : {"left", "right"}) {
+                cout << x << " : ";
+                cin >> type >> func;
+                if(type != "Dirichlet" && type != "Neumann") {
+                    std::cout << "not defined!\n";
+                    continue;
+                }
+                prob.mixed_g[x] = {type, func};
+            }  
+            }
+            else {
             for(string x : {"down", "left", "right", "up"}) {
                 cout << x << " : ";
                 cin >> type >> func;
@@ -71,6 +89,7 @@ int main() {
                 }
                 prob.mixed_g[x] = {type, func};
             }
+            }
         } else {
             cout << "If the function of BC are the same? [y or n] : ";
             string func;
@@ -79,11 +98,18 @@ int main() {
                 cin >> func;
                 prob.g["all"] = func;
             } else {
+            if(prob.Dimension == 2)
             for(string x : {"down", "left", "right", "up"}) {
                 cout << x << " : ";
                 cin >> func;
                 prob.g[x] = func;
-            }}
+            } else
+            for(string x : {"left", "right"}) {
+                cout << x << " : ";
+                cin >> func;
+                prob.g[x] = func;
+            }
+            }
         }
 
         cout << "Need error analysis or not? [y or n] : ";

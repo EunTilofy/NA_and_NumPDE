@@ -147,7 +147,7 @@ $$
 >
 > $$
 > \begin{aligned}
-> \mathbf{f}^h &\leftarrow I_h^{2h}(\mathbf{f}^h - A^h \mathbf{v}^h), \\
+> \mathbf{f}^{2h} &\leftarrow I_h^{2h}(\mathbf{f}^h - A^h \mathbf{v}^h), \\
 > \mathbf{v}^{2h} &\leftarrow \mathbf{0}, \\
 > \mathbf{v}^{2h} &\leftarrow \texttt{VC}^{2h}(\mathbf{v}^{2h}, \mathbf{f}^{2h}, \nu_1, \nu_2).
 > \end{aligned}

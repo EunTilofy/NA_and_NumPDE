@@ -1,5 +1,5 @@
 /**********************************************************************
- * Ver 3.2 updated on Jan. 2nd, 2024, by EunTilofy
+ * Ver 3.3 updated on Feb. 13nd, 2024, by EunTilofy
  * In this version, 
  * 1, use Vec instead of vector<Type>
  * 2, add RowVec, and completed a lot of new functions
@@ -10,7 +10,8 @@
  *    representing the type of the number field of vector space.
  * 7, other changes for you to find out !
  * 8, Add toVector() to class Vec.
- * 9, Add Gause Elimination and Thomas Method to solve linear systems.
+ * 9, [ver3.1] Add Gause Elimination and Thomas Method to solve linear systems.
+ * 10, [ver3.3] Add Sparse Matrix class.
  * (!IMPORTANT!) This version is still under testing, there may remains 
  *               some problems when compiling.
 ***********************************************************************/
@@ -111,7 +112,7 @@ public:
         return y;
     }
     friend VecT operator * (const Ftype& num, const VecT& x) {
-        vector<Type> v(x.size());
+        Vec<Type> v(x.size);
         for(int i = 0; i < v.size; ++i) v[i] = x[i] * num;
         return v;
     }
@@ -425,6 +426,141 @@ Vec<Type> Thomas(Vec<Type> a, Vec<Type> b, Vec<Type> c, Vec<Type> y) {
 	return y;
 }
 
+template<class Type>
+class SparseMat {
+    class MatLine {
+        int len;
+        Type zero;
+    public:
+        vector<pair<int,Type>> a[13];
+        MatLine(int _len = 0) : len(_len), zero(0) {}
+        Type& operator [] (const int& pos) { 
+            assert(pos <= len && pos >= 0);
+            for(pair<int, Type>& val : a[pos%13]) if(val.first == pos) return val.second;
+            a[pos%13].push_back({pos, 0});
+            return a[pos%13].back().second;
+        }
+        const Type& operator [] (const int& pos) const { 
+            assert(pos <= len && pos >= 0);
+            for(const pair<int, Type>& val : a[pos%13]) if(val.first == pos) return val.second;
+            return zero;
+        }
+        void setv(int pos, Type v) {
+            assert(pos <= len && pos >= 0);
+            for(pair<int, Type>& val : a[pos%13]) if(val.first == pos) {val.second = v; return;}
+            a[pos%13].push_back({pos, v});
+        }
+        Type v(int pos) {
+            assert(pos <= len && pos >= 0);
+            for(pair<int, Type>& val : a[pos%13]) if(val.first == pos) return val.second;
+            return 0;
+        }
+        Type indot(const Vec<Type>& b) const {
+            assert(b.size == len);
+            Type ret = 0;
+            for(int i = 0; i < 13; ++i)
+                for(pair<int, Type> val : a[i])
+                    ret = ret + (val.second * b[val.first]);
+            return ret;
+        }
+        MatLine operator * (const Type& x) const {
+            MatLine z = *this;
+            for(int j = 0; j < 13; ++j) 
+                for(pair<int, Type>& val : z.a[j]) val.second = val.second * x;
+            return z;
+        }
+        MatLine operator - () const {
+            MatLine z = *this;
+            for(int j = 0; j < 13; ++j) 
+                for(pair<int, Type>& val : z.a[j]) val.second = -val.second;
+            return z;
+        }
+        MatLine operator / (const Type& x) const {
+            MatLine z = *this;
+            for(int j = 0; j < 13; ++j)
+                for(pair<int, Type>& val : z.a[j]) val.second = val.second / x;
+            return z;
+        }
+        friend ostream& operator << (ostream& o, const MatLine &line) {
+            bool fl = 0;
+            vector<pair<int, Type>> vals;
+            for(int i = 0; i < 13; ++i)
+                for(pair<int, Type> val : line.a[i]) vals.push_back(val);
+            o << vals;
+            return o;
+        }
+        operator Vec<Type>() const {
+            Vec<Type> b(len);
+            for(int i = 0; i < 13; ++i)
+                for(auto [j, val] : a[i]) b[j] = val;
+            return b;
+        }
+    };
+public:
+    int d, d2; // the dimension of column vector and row vector.
+    vector<MatLine> a;
+    typedef Vec<Type> VecT;
+    typedef Mat<Type, Type> MatT;
+    SparseMat() : d(0), d2(0), a(0) {}
+    SparseMat(const int& _d) : d(_d), d2(_d), a(_d, _d) {}
+    SparseMat(const int& _d, const int& _d2) : d(_d), d2(_d2), a(_d, _d2) {}
+    
+    MatLine& operator[] (const int &x) { return a[x]; }
+    const MatLine& operator[] (const int &x) const { return a[x]; }
+    auto begin() const -> decltype(a.begin()) {
+        return a.begin();
+    }
+    auto begin() -> decltype(a.begin()) {
+        return a.begin();
+    }
+    auto end() const -> decltype(a.end()) {
+        return a.end();
+    }
+    auto end() -> decltype(a.end()) {
+        return a.end();
+    }
+
+    VecT operator * (const VecT& y) const {
+        VecT z(d);
+        for(int i = 0; i < z.size; ++i) z[i] = (*this)[i].indot(y);
+        return z;
+    }
+    SparseMat<Type> operator * (const Type &x) const {
+        SparseMat<Type> z = (*this);
+        for(int i = 0; i < z.d; ++i) z[i] = z[i] * x;
+        return z;   
+    }
+    SparseMat<Type> operator - () const {
+        SparseMat<Type> z = (*this);
+        for(int i = 0; i < z.d; ++i) z[i] = -z[i];
+        return z;   
+    }
+    friend SparseMat<Type> operator * (const Type &x, const SparseMat<Type> &y) {
+        SparseMat<Type> z = y;
+        for(int i = 0; i < z.d; ++i) z[i] = z[i] * x;
+        return z;
+    }
+    SparseMat<Type> operator / (const Type& x) const {
+        assert(x != 0);
+        SparseMat<Type> z = (*this);
+        for(int i = 0; i < z.d; ++i) z[i] = z[i] / x;
+        return z;
+    }
+    operator MatT() const {
+        MatT A(d, d2);
+        for(int i = 0; i < d; ++i) A[i] = VecT((*this)[i]);
+        return A;
+    }
+    void setv(int i, int j, Type v) { a[i].setv(j, v); }
+    void v(int i, int j) { return a[i].v(j); }
+    REGISTER_OUTPUT(SparseMat, d, d2, a);
+};
+
+template <class Type>
+Vec<Type> Gauss_elimination(SparseMat<Type> A, Vec<Type> b) {
+    Mat<Type, Type> A2 = Mat<Type, Type>(A);
+    return Gauss_elimination(A2, b);
+}
 
 }
 #endif

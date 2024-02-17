@@ -1,0 +1,23 @@
+----------------- BVP Problem Setting ------------------
+Boundary Condition Type : Dirichlet
+Domain Type : Regular
+Domain Border : [0, 1, 0, 1]
+Grid number : 512 x 512
+Restriction Operator Type : full_weight
+Interpolation Operator Type : linear
+Cycle Type : V
+f : -(1-sin(x)+cos(x)*cos(x))*exp(sin(x)+y)
+g : {
+     down -> exp(sin(x)+y)
+     left -> exp(sin(x)+y)
+     right -> exp(sin(x)+y)
+     up -> exp(sin(x)+y)
+}
+Maximum Iteration : 50
+Accuracy of Cycles Part : 1e-09
+Need to analysis error of this problem.
+The true answer is : exp(sin(x)+y)
+--------------------------------------------------------
+Error norm-1   : 0.0000000568
+Error norm-2   : 0.0000000697
+Error norm-inf : 0.0000001349

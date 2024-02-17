@@ -1,0 +1,22 @@
+{
+    "Accuracy" : 1e-9,
+    "BC_Type" : "Dirichlet",
+    "Cycle_Type" : "V",
+    "Dimension" : 2,
+    "Domain_Border" : [ 0.0, 1.0, 0.0, 1.0 ],
+    "Domain_Type" : "Regular",
+    "Grid_n" : 512,
+    "Interpolation_opt" : "linear",
+    "Max_Iteration" : 50,
+    "Need_Error" : true,
+    "Restriction_opt" : "full_weight",
+    "answer" : "exp(sin(x)+y)",
+    "f" : "-(1-sin(x)+cos(x)*cos(x))*exp(sin(x)+y)",
+    "g" : {
+       "down" : "exp(sin(x)+y)",
+       "left" : "exp(sin(x)+y)",
+       "right" : "exp(sin(x)+y)",
+       "up" : "exp(sin(x)+y)"
+    }
+ }
+ 

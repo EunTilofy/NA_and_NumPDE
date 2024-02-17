@@ -1,8 +1,9 @@
 /************************************************************************
- * Ver 2.0, Dec. 22nd, 2023.
+ * Ver 2.1, Feb. 16th, 2024.
  * 1. Add serialization method.
  * 2. Offer two different kind of methods to serialize map<string, *>.
  * 3. Offer two different kind of methods to serialize UDT.
+ * 4. Optimize UDP Type serialiazation for non-defined members.
 ***********************************************************************/
 #ifndef _SERIALIZE_JSON_HPP_
 #define _SERIALIZE_JSON_HPP_
@@ -374,6 +375,7 @@ void register_normal_func(const Func& func, Members&... members) {
         reverse(mem_names.begin(), mem_names.end()); \
         register_const_func([&](const auto& member){ \
             root[mem_names.back()] = udt_serialize_Json_Impl(member); \
+            if(root[mem_names.back()].isNull()) root.removeMember(mem_names.back()); \
             mem_names.pop_back(); \
             if(mem_names.size()) mem_names.pop_back(); \
         }, __VA_ARGS__); \
