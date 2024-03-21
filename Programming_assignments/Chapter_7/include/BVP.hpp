@@ -32,13 +32,6 @@ public:
 };
 
 class Square_BVP_Problem{
-public:
-    // common
-    // Support : 1. Regular; 2. Irregular(with a circle not in the reigeon)
-    std::string BC_Type; /* boundary condition : mixed, Dirichlet, Neumann*/
-    std::string Domain_Type; /* regular irregular*/
-    vector<double> Domain_Border; /* [xl, xr, yl, yr] */
-    double xl, xr, yl, yr, h;
     void getDomain() {
         if(Domain_Border.size() < 4) { throw "Domain Border not satisfiable."; }
         xl = Domain_Border[0];
@@ -51,20 +44,6 @@ public:
         h = (xr - xl) / Grid_n;
         if(xl > xr + eps || yl > yr + eps) throw "Illegal Domain.";
     }
-    bool inBorder(double x, double y) const {
-        return (x >= xl && x <= xr) && (y >= yl && y <= yr);
-    }
-    int Grid_n; /* Grid_n x Grid_n */
-    std::string f; /* - \Delta u (in Domain)*/
-    func2D F;
-
-    // Irregular
-    std::pair<double, double> Center;
-    double R;
-    bool inCircle(double x, double y) const {
-        return (dis({x, y}, Center) < R);
-    }
-    bool use_old;
     void checkDomain() {
         double cx, cy;
         cx = Center.first; cy = Center.second;
@@ -84,6 +63,28 @@ public:
                 use_old = 1;
             }
     }
+public:
+    // common
+    // Support : 1. Regular; 2. Irregular(with a circle not in the reigeon)
+    std::string BC_Type; /* boundary condition : mixed, Dirichlet, Neumann*/
+    std::string Domain_Type; /* regular irregular*/
+    vector<double> Domain_Border; /* [xl, xr, yl, yr] */
+    double xl, xr, yl, yr, h;
+
+    bool inBorder(double x, double y) const {
+        return (x >= xl && x <= xr) && (y >= yl && y <= yr);
+    }
+    int Grid_n; /* Grid_n x Grid_n */
+    std::string f; /* - \Delta u (in Domain)*/
+    func2D F;
+
+    // Irregular
+    std::pair<double, double> Center;
+    double R;
+    bool inCircle(double x, double y) const {
+        return (dis({x, y}, Center) < R);
+    }
+    bool use_old;
     bool inDomain(double x, double y) const {
         return inBorder(x, y) && !inCircle(x, y);
     }
@@ -184,12 +185,14 @@ public:
 };
 
 enum Position { down, lef, rig, up, Cir };
+typedef std::vector<std::pair<pair<double, double>, double>> RES;
 
 class Square_BVPsolver {
     Square_BVP_Problem prob;
     class Regular_Square_BVPsolver;
     class Irregular_Square_BVPsolver;
     class Irregular_Square_BVPsolver_2;
+    RES results;
 public:
     void readProblem(const std::string file) {
         Square_BVP_Problem newProb;
@@ -214,6 +217,17 @@ public:
         readProblem(File);
         if(print) printProblem();
         solveProblem(print); 
+    }
+    void saveResults(std::string file = "res.csv") const {
+        ofstream OUT(file);
+        if(!OUT.is_open()) {
+            throw "[Error] open file " + file;
+            return;
+        }
+        for(auto [x, y]: results) {
+            OUT << x.first << "," << x.second << "," << y << std::endl;
+        }
+        OUT.close();
     }
     double norm1, norm2, normi;
     void Summary();
@@ -379,6 +393,27 @@ public:
             pro.updateTip(">>> Solving linear system ... done");
         }
     }
+    void get_results(const Square_BVP_Problem& p, RES& results) const {
+        results.clear();
+        for(int i = 0; i <= N; ++i) for(int j = 0; j <= N; ++j) {
+            double x = p.xl + p.h * i;
+            double y = p.yl + p.h * j;
+            double val = 0;
+            if((i == 0 || i == N) && (j == 0 || j == N)) {
+                if(nodeID.count({i, j})) val = U[nodeID.at({i, j})];
+                else if(i == 0) val = p.G[lef](x, y);
+                else if(i == N) val = p.G[rig](x, y);
+                else if(j == 0) val = p.G[down](x, y);
+                else if(j == N) val = p.G[up](x, y);
+            } 
+            else {
+                int id = nodeID.at({i, j});
+                val = U[id];
+            }
+            results.push_back({{x, y}, val});
+        }
+        return ;
+    }
     double norm1, norm2, normi;
     void ErrorAnalysis(const Square_BVP_Problem& p, bool print = 1) {
         using namespace norm;
@@ -393,6 +428,7 @@ public:
         if(allNeumann) {
             double _avg = avg(err);
             for(auto &x : err) x -= _avg;
+            for(auto &x : U) x -= _avg;
         }
         norm1 = Norm1Vec(err); norm2 = Norm2Vec(err); normi = NormiVec(err);
         if(!print) return ;
@@ -797,6 +833,24 @@ public:
             pro.updateTip(">>> Solving linear system ... done");
         }
     }
+    void get_results(const Square_BVP_Problem& p, RES& results) const {
+        results.clear();
+        for(int i = 0; i <= N; ++i) for(int j = 0; j <= N; ++j) {
+            double x = p.xl + p.h * i;
+            double y = p.yl + p.h * j;
+            double val = 0;
+            if((i == 0 || i == N) && (j == 0 || j == N)) {
+                if(nodeID.count({i, j})) val = U[nodeID.at({i, j})];
+                else if(i == 0) val = p.G[lef](x, y);
+                else if(i == N) val = p.G[rig](x, y);
+                else if(j == 0) val = p.G[down](x, y);
+                else if(j == N) val = p.G[up](x, y);
+            } 
+            else if(!p.inCircle(x, y)) val = U[nodeID.at({i, j})];
+            results.push_back({{x, y}, val});
+        }
+        return ;
+    }
     double norm1, norm2, normi;
     void ErrorAnalysis(const Square_BVP_Problem& p, bool print = 1) {
         using namespace norm;
@@ -818,6 +872,7 @@ public:
         if(allNeumann) {
             double _avg = avg(err);
             for(auto &x : err) x -= _avg;
+            for(auto &x : U) x -= _avg;
         }
         norm1 = Norm1Vec(err); norm2 = Norm2Vec(err); normi = NormiVec(err);
         if(!print) return ;
@@ -1124,6 +1179,24 @@ public:
             pro.updateTip(">>> Solving linear system ... done");
         }
     }
+    void get_results(const Square_BVP_Problem& p, RES& results) const {
+        results.clear();
+        for(int i = 0; i <= N; ++i) for(int j = 0; j <= N; ++j) {
+            double x = p.xl + p.h * i;
+            double y = p.yl + p.h * j;
+            double val = 0;
+            if((i == 0 || i == N) && (j == 0 || j == N)) {
+                if(nodeID.count({i, j})) val = U[nodeID.at({i, j})];
+                else if(i == 0) val = p.G[lef](x, y);
+                else if(i == N) val = p.G[rig](x, y);
+                else if(j == 0) val = p.G[down](x, y);
+                else if(j == N) val = p.G[up](x, y);
+            } 
+            else if(!p.inCircle(x, y)) val = U[nodeID.at({i, j})];
+            results.push_back({{x, y}, val});
+        }
+        return ;
+    }
     double norm1, norm2, normi;
     void ErrorAnalysis(const Square_BVP_Problem& p, bool print = 1) {
         using namespace norm;
@@ -1140,6 +1213,7 @@ public:
         if(allNeumann) {
             double _avg = avg(err);
             for(auto &x : err) x -= _avg;
+            for(auto &x : U) x -= _avg;
         }
         norm1 = Norm1Vec(err); norm2 = Norm2Vec(err); normi = NormiVec(err);
         if(!print) return ;
@@ -1154,34 +1228,37 @@ void Square_BVPsolver::solveProblem(bool show) {
     ProgressBar progress("BVP Problem", 1, show, show);
     if(this->prob.Domain_Type == "Regular") {
         Regular_Square_BVPsolver solver;
-        solver.solve(prob, progress);
+        solver.solve(this->prob, progress);
         progress.updateProgress(100);
         if(this->prob.Need_Error == 1) {
-            solver.ErrorAnalysis(prob);
+            solver.ErrorAnalysis(this->prob);
             norm1 = solver.norm1;
             norm2 = solver.norm2;
             normi = solver.normi;
         }
+        solver.get_results(this->prob, this->results);
     } else if(this->prob.use_old) {
         Irregular_Square_BVPsolver solver;
-        solver.solve(prob, progress);
+        solver.solve(this->prob, progress);
         progress.updateProgress(100);
         if(this->prob.Need_Error == 1) {
-            solver.ErrorAnalysis(prob);
+            solver.ErrorAnalysis(this->prob);
             norm1 = solver.norm1;
             norm2 = solver.norm2;
             normi = solver.normi;
         }
+        solver.get_results(this->prob, this->results);
     } else {
         Irregular_Square_BVPsolver_2 solver;
-        solver.solve(prob, progress);
+        solver.solve(this->prob, progress);
         progress.updateProgress(100);
         if(this->prob.Need_Error == 1) {
-            solver.ErrorAnalysis(prob);
+            solver.ErrorAnalysis(this->prob);
             norm1 = solver.norm1;
             norm2 = solver.norm2;
             normi = solver.normi;
         }
+        solver.get_results(this->prob, this->results);
     }
 }
 

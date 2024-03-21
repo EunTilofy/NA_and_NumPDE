@@ -1,0 +1,18 @@
+{
+    "BC_Type" : "mixed",
+    "Center" : [ 0.0, 0.0 ],
+    "Domain_Border" : [ 0.0, 1.0, 0.0, 1.0 ],
+    "Domain_Type" : "Regular",
+    "Grid_n" : 32,
+    "Need_Error" : true,
+    "R" : -1.0,
+    "answer" : "exp(sin(x)+y)",
+    "f" : "-(1-sin(x)+cos(x)*cos(x))*exp(sin(x)+y)",
+    "mixed_g" : {
+       "down" : [ "Dirichlet", "exp(sin(x)+y)" ],
+       "left" : [ "Dirichlet", "exp(sin(x)+y)" ],
+       "right" : [ "Neumann", "cos(1)*exp(sin(1)+y)" ],
+       "up" : [ "Neumann", "exp(sin(x)+1)" ]
+    }
+ }
+ 

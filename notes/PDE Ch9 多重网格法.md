@@ -89,7 +89,7 @@ $$
 >
 > 如果 $\mu$ 很小并且与网格大小无关，则迭代方法具有**平滑特性**。
 
-【例9.16】对于 $\lambda_k (T_{\omega}) = 1- 2\omega \sin^2 \dfrac{k\pi}{2n}$，固定 $\omega$ 后 $\lambda_k(T_{\omega})$ 关于 $k$ 单调递减，所以应当满足 $\lambda_{\frac{n}2}(T_{\omega}) = -\lambda_n(T_{\omega}) \Rightarrow \omega = \frac23$，所以 $\mu = \frac13$。
+【例9.20】对于 $\lambda_k (T_{\omega}) = 1- 2\omega \sin^2 \dfrac{k\pi}{2n}$，固定 $\omega$ 后 $\lambda_k(T_{\omega})$ 关于 $k$ 单调递减，所以应当满足 $\lambda_{\frac{n}2}(T_{\omega}) = -\lambda_n(T_{\omega}) \Rightarrow \omega = \frac23$，所以 $\mu = \frac13$。
 
 ## 9.3.3 Restriction and prolongation
 
@@ -170,7 +170,7 @@ $$
 2\text{WU}(1+2^{-D}+\cdots+2^{-mD}) < \dfrac{2}{1-2^{-D}}\text{WU}.
 $$
 
-> 【定义9.32】*full multigrid V-cycle* 用于解决【例9.7】中的 $\boxed{A\mathbf{u} = f}$ ，形式如下：
+> 【定义9.34】*full multigrid V-cycle* 用于解决【例9.7】中的 $\boxed{A\mathbf{u} = f}$ ，形式如下：
 >
 > $$
 > \mathbf{v}^h \leftarrow \texttt{FMG}^h(\mathbf{f}^h, \nu_1, \nu_2)
@@ -192,6 +192,195 @@ $$
 
 # 9.4 收敛性分析
 
-[暂略]
+## 9.4.1 谱分析
 
-# Programming 相关
+【定义9.36】称 Fourier mode $\mathbf{w}_k^h, k\in [1, \frac{n}2)$ 和 $\mathbf{w}_{k'}^h, k' = n - k$ 是 $\Omega^h$ 上互补的(*complemetnary modes*)。
+
+【引理9.37】一对互补的 Fourier modes 满足
+
+$$
+w_{k',j}^h = (-1)^{j+1} w_{k,j}^h.
+$$
+
+**证明：**$w_{k',j}^h = \sin \dfrac{(n-k)j\pi}{n} = \sin(j\pi - \dfrac{kj\pi}n) = (-1)^{j+1}w_{k,j}^h$。
+
+【引理9.38】作用在 $\Omega^h$ 上互补的 Fourier modes 上的 full-weighting 算子为：
+
+$$
+I_h^{2h} \mathbf{w}_k^h = c_k \mathbf{w}_k^{2h} := \cos^2 \dfrac{k\pi}{2n}\mathbf{w}_k^{2h},
+\\
+I_h^{2h} \mathbf{w}_{k'}^h = -s_k \mathbf{w}_k^{2h} := -\sin^2 \dfrac{k\pi}{2n}\mathbf{w}_k^{2h},
+$$
+
+$k\in [1, \frac{n}2), k' = n - k$，特别的 $I_h^{2h}\mathbf{w}_{\frac{n}2}^h = \mathbf{0}$。
+
+**证明：**对于低频mode $k$，有
+
+$$
+\begin{aligned}
+&(I_h^{2h}\mathbf{w}_k^h)_j \\
+=&\frac14 \sin \frac{(2j-1)k\pi}{n} + \frac12 \sin \frac{2jk\pi}{n} + \frac14 \sin \frac{(2j+1)\pi}{n} \\
+=& \frac12 (1 + \cos \frac{k\pi}n)\sin \frac{2jk\pi}n = \cos^2 \frac{k\pi}{2n} w_{k,j}^{2h}
+\end{aligned}
+$$
+
+【引理9.39】作用在 $\Omega^{2h}$ 上的线性插值算子为
+
+$$
+I_{2h}^h \mathbf{w}_k^{2h} = c_k \mathbf{w}_k^h - s_k \mathbf{w}_{k'}^h, k' = n - k
+$$
+
+**证明：**由 Lem 9.37 得，
+
+$$
+c_k w_{k,j}^h - s_k w_{k',j}^h = \left(
+	\cos^2 \frac{k\pi}{2n} + (-1)^j \sin^2 \frac{k\pi}{2n}
+\right)w_{k,j}^h = \begin{cases}
+w_{k,j}^h \quad \text{if j is even} \\
+\cos \frac{k\pi}n w_{k,j}^h \quad \text{if j is odd}
+\end{cases}
+$$
+
+另一方面，根据 Def 9.28
+
+$$
+(I_{2h}^h \mathbf{w}_k^{2h})_j = \begin{cases}
+	w_{k,j}^h, & \text{if j is even} \\
+	\frac12 (\sin \frac{k\pi (j - 1)}n + \sin \frac{k\pi (j + 1)}n) & \text{if j is odd}
+\end{cases}
+$$
+
+备注：$w_{k,j}^h = \sin jkh\pi$，$\frac12 (w_{k,\frac{j}2-\frac12}^{2h} + w_{k,\frac{j}2+\frac12}^{2h}) =\frac12 (\sin kh\pi (j - 1) + \sin k\pi (j + 1)h) $。
+
+【定理9.40】双网格校正在子空间 $W_k^h = \text{span} \{\mathbf{w}_k^h, \mathbf{w}_{k'}^h\}$ 上不变，
+
+$$
+TG_{\mathbf{w}_k} = \lambda_k^{\nu_1 + \nu_2}s_k \mathbf{w}_k + \lambda_k^{\nu_1}\lambda_{k'}^{\nu_2} s_k \mathbf{w}_{k'} \\
+TG_{\mathbf{w}_{k'}} = \lambda_{k'}^{\nu_1} \lambda_k^{\nu_2} c_k \mathbf{w}_k + \lambda_{k'}^{\nu_1 + \nu_2}c_k \mathbf{w}_{k'}
+$$
+
+其中 $\lambda_k$ 是 $T_{\omega}$ 的特征值。
+
+**证明：**注意到 $A^h$ 的特征值是 $\frac4{h^2}s_k$  考虑 $\nu_1 = \nu_2 = 0$ 的情形，
+
+$$
+\begin{aligned}
+&A^h\mathbf{w}_k^h = \frac{4s_k}{h^2} \mathbf{w}^h_k \\
+\Rightarrow & I_h^{2h} A^h \mathbf{w}_k^h = \frac{4c_k s_k}{h^2} \mathbf{w}_k^{2h} \\
+\Rightarrow & (A^{2h})^{-1} I_h^{2h} A^h \mathbf{w}_k^h = \frac{4c_k s_k}{h^2} \frac{(2h)^2}{4\sin^2 \frac{k\pi}n}\mathbf{w}_k^{2h} = \mathbf{w}_k^{2h} \\
+\Rightarrow & - I_{2h}^h (A^{2h})^{-1} I_h^{2h} A^h \mathbf{w}_k^{h} = -c_k \mathbf{w}_k^h
+ + s_k \mathbf{w}_{k'}^h \\
+ \Rightarrow &[I - I_{2h}^h (A^{2h})^{-1} I_h^{2h} A^h] \mathbf{w}_k^h = s_k \mathbf{w}_k^h + s_k\mathbf{w}_{k'}^h ~~~~~~~~~~~~~~\text{(1)}
+ \end{aligned}
+$$
+
+相似的，
+
+$$
+\begin{aligned}
+&A^h\mathbf{w}_{k'}^h = \frac{4s_{k'}}{h^2} \mathbf{w}^h_{k'} = \frac{4c_k}{h^2}\mathbf{w}_{k'}^h \\
+\Rightarrow & I_h^{2h} A^h \mathbf{w}_{k'}^h = -\frac{4c_k s_k}{h^2} \mathbf{w}_k^{2h} \\
+\Rightarrow & (A^{2h})^{-1} I_h^{2h} A^h \mathbf{w}_{k'}^h = -\frac{4c_k s_k}{h^2} \frac{(2h)^2}{4\sin^2 \frac{k\pi}n}\mathbf{w}_k^{2h} = -\mathbf{w}_k^{2h} \\
+\Rightarrow & - I_{2h}^h (A^{2h})^{-1} I_h^{2h} A^h \mathbf{w}_{k'}^{h} = c_k \mathbf{w}_k^h
+ - s_k \mathbf{w}_{k'}^h \\
+ \Rightarrow &[I - I_{2h}^h (A^{2h})^{-1} I_h^{2h} A^h] \mathbf{w}_{k'}^h = c_k \mathbf{w}_k^h + c_k\mathbf{w}_{k'}^h~~~~~~~~~~~~~~\text{(2)}
+ \end{aligned}
+$$
+
+加入前松弛后后松弛，前松弛对 (1) 乘 $\lambda_k^{\nu_1}$，对 (2) 乘 $\lambda_{k'}^{\nu_1}$，后松弛对 $\mathbf{w}_k^h$ 乘 $\lambda_{k}^{\nu_1}$，对 $\mathbf{w}_{k'}^{\nu_2}$ 乘 $\lambda_k^{\nu_2}$。最后得到定理中的两个式子。
+
+## 9.4.2 代数图像
+
+【引理9.42】全加权算子和线性插值算子满足：$I_{2h}^h = c(I_h^{2h})^T, I_h^{2h}A^hI_{2h}^h = A^{2h},c =2$。
+
+【引理9.43】线性插值矩阵的一组基是它的全体列向量，因此 $\dim \mathcal{R}(I_{2h}^h) = \frac{n}2 - 1, \mathcal{N}(I_{2h}^h) = \{\mathbf{0}\}$。
+
+**证明：**记 $\mathbf{v}^{2h} = \sum v_j^{2h}\mathbf{e}_j^{2h}$，则 $I_{2h}^h \mathbf{v}^{2h} = \sum v_j^{2h} I_{2h}^h \mathbf{e}_j^{2h}$，其中 $I_{2h}^h \mathbf{e}_j^{2h}$ 是 $I_{2h}^h$ 的列。（$I_{2h}^h$ 是满秩的） 。
+
+【引理9.44】full-weighting 算子满足：$\dim \mathcal{R}(I_h^{2h}) = \frac{n}2 - 1, \quad \dim \mathcal{N}(I_{h}^{2h}) = \frac{n}2$。
+
+【引理9.46】full-weighting 算子的核空间 $\mathcal{N}(I_h^{2h}) = \text{span}\{A^h\mathbf{e}_j^h: j ~~\text{is odd}\}$。
+
+**证明：**
+
+$$
+(I_h^{2h})_j = [0, \cdots, 0, \frac14, \frac12, \frac14, 0, \cdots, 0]^T,\quad\text{非0项是}2j-1，2j,2j+1 项
+$$
+
+考虑矩阵 $I_h^{2h}A^h$，即 $\sum_{i = 1}^{n-1}(I_h^{2h})_{ji}(A^h)_{ik} = \begin{cases}-\frac14& k = 2j\pm2 \\0& k = 2j\pm1\\\frac12&k = 2j\end{cases}$。
+
+【引理9.47】不带松弛的二网格校正的核空间是线性插值的像空间：$\mathcal{N}(TG) = \mathcal{R}(I_{2h}^h)$。
+
+**证明：**设 $\mathbf{s}^h \in \mathcal{R}(I_{2h}^h), \exists \mathbf{q}^{2h} \in \mathbb{R}^{\frac{n}2 - 1}, \mathbf{s}^h = I_{2h}^h \mathbf{q}^{2h}$。
+
+$$
+TG \mathbf{s}^h = [I - I_{2h}^h (A^{2h})^{-1}I_h^{2h}A^h]I_{2h}^h\mathbf{q}^{2h} = 
+= [I_{2h}^h - I_{2h}^h(A^{2h})^{-1}A^{2h}]\mathbf{q}^{2h} = \mathbf{0}\cdot \mathbf{q}^{2h} = \mathbf{0}
+$$
+
+所以 $\mathcal{R}(I_{2h}^h) \subseteq \mathcal{N}(TG)$。
+
+设 $\mathbf{t}^h \in \mathcal{N}(I_h^{2h}A^h)$，
+
+$$
+TG\mathbf{t}^h = [I - I_{2h}^h (A^{2h})^{-1}I_h^{2h}A^h]\mathbf{t}^h = \mathbf{t}^h
+$$
+
+根据线性映射基本定理，$n - 1 = \dim \mathcal{N}(TG) + \dim \mathcal{R}(TG)$。因为 TG 是 $\mathcal{N}(I_h^{2h}A^h)$ 上的恒等映射，所以
+
+$$
+\dim \mathcal{R}(TG) \ge \dim \mathcal{N}(I_h^{2h}A^h) = \dim \mathcal{N}(I_h^{2h}) = \frac{n}2
+$$
+
+所以 $\dim \mathcal{N}(TG) \le \frac{n}2 - 1 = \dim \mathcal{R}(I_{2h}^h)$，所以得证。
+
+<center><img src="/Users/pac/Documents/2024-sp/NumPDE/NA_and_NumPDE/notes/image/PDE%20Ch9%20%E5%A4%9A%E9%87%8D%E7%BD%91%E6%A0%BC%E6%B3%95/image-20240318015114382.png" alt="image-20240318015114382" style="zoom:50%;width = 50%;" /></center>
+
+【定义9.48】设 $A$  为 $n$ 阶正定矩阵，记 $A-$内积为 $\langle \mathbf{u}, \mathbf{v}\rangle_A := \langle A\mathbf{u}, \mathbf{v}\rangle = \mathbf{u}^T A \mathbf{v}$，$A-$范数为 $\| \mathbf{u}\|_A:= \sqrt{\langle \mathbf{u}, \mathbf{u}\rangle_A}$；若 $\langle \mathbf{u}, \mathbf{v}\rangle_A = 0$，则称 $\mathbf{u,v}$ 是 $A-$正交。
+
+## 9.4.3 FMG 的最优复杂性
+
+【定义9.49】FMG 的误差为 $E_i^h:= v_i^h - u(x_i)=v_i^h - u_i^h + u_i^h - u(x_i)$。其中 $v_i^h - u_i^h$ 是线性方程组的求解误差，而 $u_i^h - u(x_i)$ 是截断误差。
+
+【引理9.50】从粗网格到细网格进行线性插值，有
+
+$$
+\sqrt{c} \| \mathbf{v}^{2h} - \mathbf{u}^{2h} \|_{A^{2h}} = \| I_{2h}^h \mathbf{v}^{2h} - I_{2h}^h \mathbf{u}^{2h} \|_{A^h}, c = 2
+$$
+
+**证明：**
+
+$$
+\begin{aligned}
+&\| \mathbf{v}^{2h} - \mathbf{u}^{2h}\|_{A^{2h}}^2\\
+=&\langle A^{2h}(\mathbf{v}^{2h} - \mathbf{u}^{2h}), \mathbf{v}^{2h} - \mathbf{u}^{2h} \rangle\\
+=&\langle I_h^{2h}A^h I_{2h}^h (\mathbf{v}^{2h} - \mathbf{u}^{2h}), \mathbf{v}^{2h} - \mathbf{u}^{2h}\rangle\\
+=&\left\langle A^h I_{2h}^h(\mathbf{v}^{2h} - \mathbf{u}^{2h}), \frac1c I_{2h}^h (\mathbf{v}^{2h} - \mathbf{u}^{2h})\right\rangle\\
+=&\frac1c \| I_{2h}^h\mathbf{v}^{2h} - I_{2h}^h \mathbf{u}^{2h} \|^2_{A^h}
+\end{aligned}
+$$
+
+【引理9.51】假设存在一个和网格大小 $h$ 无关的常数 $K\in\mathbb{R}^+$ 满足 $\|I_{2h}^h\mathbf{u}^{2h} - \mathbf{u}^h\|_{A^h} \le Kh^p$，其中 $p=2$ 是收敛率。
+
+**证明：**
+
+数学归纳法。在最粗网格上 FMG 是精确的，所以归纳基础成立。假设 $\| \mathbf{e}^{2h}\|_{A^{2h}}\le K(2h)^p$，在 $\Omega^h$ 上，
+
+$$
+\mathbf{e}_0^h = I_{2h}^h \mathbf{v}^{2h} - \mathbf{u}^h
+$$
+
+在 $\Omega^h$ 上， $\mathbf{e}_0^h = I_{2h}^h \mathbf{v}^{2h} - \mathbf{u}^h$，所以
+
+$$
+\begin{aligned}
+\| \mathbf{e}_0^h \|_{A^h} &\le \| I_{2h}^h \mathbf{v}^{2h} - I_{2h}^h \mathbf{u}^{2h}\|_{A^h} + \| I_{2h}^h \mathbf{u}^{2h} - \mathbf{u}^h \|_{A^h} \\
+&= \sqrt{c} \| \mathbf{v}^{2h} - \mathbf{u}^{2h} \|_{A^{2h}} + \| I_{2h}^h \mathbf{u}^{2h} - \mathbf{u}^h \|_{A^h} \\
+&\le \sqrt{c} K (2h)^p + K h^p = (1 + \sqrt{c}2^p) Kh^p\\
+&< 7 K h^p
+\end{aligned}
+$$
+
+【定理9.52】一个 FMG 循环复杂度 $O(\frac1h)$ 可以达到2阶收敛率。
+
+**证明：** $\|\mathbf{E}^h\| \le \| \mathbf{u}^h - \mathbf{u}\| + \|\mathbf{u}^h - \mathbf{v}^h \|$。

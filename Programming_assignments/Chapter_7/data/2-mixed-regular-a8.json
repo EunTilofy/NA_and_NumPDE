@@ -1,0 +1,17 @@
+{
+   "BC_Type" : "mixed",
+   "Center" : [ 0.0, 0.0 ],
+   "Domain_Border" : [ 0.0, 1.0, 0.0, 1.0 ],
+   "Domain_Type" : "Rregular",
+   "Grid_n" : 8,
+   "Need_Error" : true,
+   "R" : -1.0,
+   "answer" : "sin(x)*cos(y)",
+   "f" : "2*sin(x)*cos(y)",
+   "mixed_g" : {
+      "down" : [ "Dirichlet", "sin(x)*cos(y)" ],
+      "left" : [ "Dirichlet", "sin(x)*cos(y)" ],
+      "right" : [ "Neumann", "cos(x)*cos(y)" ],
+      "up" : [ "Neumann", "-sin(x)*sin(y)" ]
+   }
+}

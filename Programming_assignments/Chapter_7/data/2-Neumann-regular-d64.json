@@ -1,0 +1,17 @@
+{
+   "BC_Type" : "Neumann",
+   "Center" : [ 0.0, 0.0 ],
+   "Domain_Border" : [ 0.0, 1.0, 0.0, 1.0 ],
+   "Domain_Type" : "Rregular",
+   "Grid_n" : 64,
+   "Need_Error" : true,
+   "R" : -1.0,
+   "answer" : "sin(x)*cos(y)",
+   "f" : "2*sin(x)*cos(y)",
+   "g" : {
+      "down" : "sin(x)*sin(y)",
+      "left" : "-cos(x)*cos(y)",
+      "right" : "cos(x)*cos(y)",
+      "up" : "-sin(x)*sin(y)"
+   }
+}

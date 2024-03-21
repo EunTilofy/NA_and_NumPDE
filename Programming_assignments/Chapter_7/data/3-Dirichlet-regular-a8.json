@@ -1,0 +1,14 @@
+{
+   "BC_Type" : "Dirichlet",
+   "Center" : [ 0.0, 0.0 ],
+   "Domain_Border" : [ 0.0, 1.0, 0.0, 1.0 ],
+   "Domain_Type" : "Regular",
+   "Grid_n" : 8,
+   "Need_Error" : true,
+   "R" : -1.0,
+   "answer" : "log(1+x*x+y*y)",
+   "f" : "(4*x*x+4*y*y-4*(1+x*x+y*y))/(1+x*x+y*y)/(1+x*x+y*y)",
+   "g" : {
+      "all" : "log(1+x*x+y*y)"
+   }
+}

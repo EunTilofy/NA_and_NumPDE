@@ -1,0 +1,14 @@
+{
+   "BC_Type" : "Dirichlet",
+   "Center" : [ 0.40999999999999998, 0.55000000000000004 ],
+   "Domain_Border" : [ 0.0, 1.0, 0.0, 1.0 ],
+   "Domain_Type" : "Irregular",
+   "Grid_n" : 128,
+   "Need_Error" : true,
+   "R" : 0.14999999999999999,
+   "answer" : "sin(x)*cos(y)",
+   "f" : "2*sin(x)*cos(y)",
+   "g" : {
+      "all" : "sin(x)*cos(y)"
+   }
+}

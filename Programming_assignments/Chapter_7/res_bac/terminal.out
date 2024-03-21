@@ -1,0 +1,361 @@
+Solve : data/1-Dirichlet-irregular-a8.json 
+Error norm-1   : 0.0004834779
+Error norm-2   : 0.0008625033
+Error norm-inf : 0.0036668519
+Solve : data/1-Dirichlet-irregular-b16.json 
+Error norm-1   : 0.0000776002
+Error norm-2   : 0.0001258751
+Error norm-inf : 0.0005149616
+Solve : data/1-Dirichlet-irregular-c32.json 
+Error norm-1   : 0.0000255120
+Error norm-2   : 0.0000421896
+Error norm-inf : 0.0002863917
+Solve : data/1-Dirichlet-irregular-d64.json 
+Error norm-1   : 0.0000080168
+Error norm-2   : 0.0000127885
+Error norm-inf : 0.0000812829
+Solve : data/1-Dirichlet-irregular-e128.json 
+Error norm-1   : 0.0000020462
+Error norm-2   : 0.0000031676
+Error norm-inf : 0.0000230510
+Solve : data/1-Dirichlet-regular-a8.json 
+Error norm-1   : 0.0001873230
+Error norm-2   : 0.0002589848
+Error norm-inf : 0.0005369807
+Solve : data/1-Dirichlet-regular-b16.json 
+Error norm-1   : 0.0000519813
+Error norm-2   : 0.0000676153
+Error norm-inf : 0.0001375950
+Solve : data/1-Dirichlet-regular-c32.json 
+Error norm-1   : 0.0000137453
+Error norm-2   : 0.0000173458
+Error norm-inf : 0.0000344502
+Solve : data/1-Dirichlet-regular-d64.json 
+Error norm-1   : 0.0000035391
+Error norm-2   : 0.0000043983
+Error norm-inf : 0.0000086241
+Solve : data/1-Dirichlet-regular-e128.json 
+Error norm-1   : 0.0000008983
+Error norm-2   : 0.0000011078
+Error norm-inf : 0.0000021565
+Solve : data/1-Neumann-irregular-a8.json 
+Error norm-1   : 0.0048601207
+Error norm-2   : 0.0054052470
+Error norm-inf : 0.0093239127
+Solve : data/1-Neumann-irregular-b16.json 
+Error norm-1   : 0.0011380057
+Error norm-2   : 0.0012953070
+Error norm-inf : 0.0036537516
+Solve : data/1-Neumann-irregular-c32.json 
+Error norm-1   : 0.0002480172
+Error norm-2   : 0.0002804405
+Error norm-inf : 0.0008123577
+Solve : data/1-Neumann-irregular-d64.json 
+Error norm-1   : 0.0000618407
+Error norm-2   : 0.0000695836
+Error norm-inf : 0.0002257598
+Solve : data/1-Neumann-irregular-e128.json 
+Error norm-1   : 0.0000154540
+Error norm-2   : 0.0000173627
+Error norm-inf : 0.0000521972
+Solve : data/1-Neumann-regular-a8.json 
+Error norm-1   : 0.0035392004
+Error norm-2   : 0.0040956710
+Error norm-inf : 0.0081408608
+Solve : data/1-Neumann-regular-b16.json 
+Error norm-1   : 0.0008594957
+Error norm-2   : 0.0009994569
+Error norm-inf : 0.0020968485
+Solve : data/1-Neumann-regular-c32.json 
+Error norm-1   : 0.0002103755
+Error norm-2   : 0.0002451722
+Error norm-inf : 0.0006467671
+Solve : data/1-Neumann-regular-d64.json 
+Error norm-1   : 0.0000518963
+Error norm-2   : 0.0000605251
+Error norm-inf : 0.0001981372
+Solve : data/1-Neumann-regular-e128.json 
+Error norm-1   : 0.0000128758
+Error norm-2   : 0.0000150184
+Error norm-inf : 0.0000587490
+Solve : data/1-mixed-irregular-a8.json 
+[warning] the circle is too near to the border, we may use another method to solve your problem.
+Error norm-1   : 0.0009312739
+Error norm-2   : 0.0016941043
+Error norm-inf : 0.0068750723
+Solve : data/1-mixed-irregular-b16.json 
+Error norm-1   : 0.0000910936
+Error norm-2   : 0.0001488428
+Error norm-inf : 0.0005910630
+Solve : data/1-mixed-irregular-c32.json 
+Error norm-1   : 0.0000205324
+Error norm-2   : 0.0000319188
+Error norm-inf : 0.0001318214
+Solve : data/1-mixed-irregular-d64.json 
+Error norm-1   : 0.0000057256
+Error norm-2   : 0.0000089742
+Error norm-inf : 0.0000390688
+Solve : data/1-mixed-irregular-e128.json 
+Error norm-1   : 0.0000013168
+Error norm-2   : 0.0000020896
+Error norm-inf : 0.0000098320
+Solve : data/1-mixed-regular-a8.json 
+Error norm-1   : 0.0014173416
+Error norm-2   : 0.0022666536
+Error norm-inf : 0.0067442858
+Solve : data/1-mixed-regular-b16.json 
+Error norm-1   : 0.0003411919
+Error norm-2   : 0.0005356964
+Error norm-inf : 0.0016984952
+Solve : data/1-mixed-regular-c32.json 
+Error norm-1   : 0.0000835050
+Error norm-2   : 0.0001297699
+Error norm-inf : 0.0004245204
+Solve : data/1-mixed-regular-d64.json 
+Error norm-1   : 0.0000206455
+Error norm-2   : 0.0000318981
+Error norm-inf : 0.0001061232
+Solve : data/1-mixed-regular-e128.json 
+Error norm-1   : 0.0000051317
+Error norm-2   : 0.0000079046
+Error norm-inf : 0.0000265302
+Solve : data/2-Dirichlet-irregular-a8.json 
+Error norm-1   : 0.0001317116
+Error norm-2   : 0.0001984358
+Error norm-inf : 0.0006019117
+Solve : data/2-Dirichlet-irregular-b16.json 
+Error norm-1   : 0.0000325628
+Error norm-2   : 0.0000458629
+Error norm-inf : 0.0001716838
+Solve : data/2-Dirichlet-irregular-c32.json 
+Error norm-1   : 0.0000086925
+Error norm-2   : 0.0000118493
+Error norm-inf : 0.0000404994
+Solve : data/2-Dirichlet-irregular-d64.json 
+Error norm-1   : 0.0000023375
+Error norm-2   : 0.0000031519
+Error norm-inf : 0.0000126639
+Solve : data/2-Dirichlet-irregular-e128.json 
+Error norm-1   : 0.0000005742
+Error norm-2   : 0.0000007641
+Error norm-inf : 0.0000032711
+Solve : data/2-Dirichlet-regular-a8.json 
+Error norm-1   : 0.0000289713
+Error norm-2   : 0.0000395560
+Error norm-inf : 0.0000811054
+Solve : data/2-Dirichlet-regular-b16.json 
+Error norm-1   : 0.0000081076
+Error norm-2   : 0.0000103711
+Error norm-inf : 0.0000205431
+Solve : data/2-Dirichlet-regular-c32.json 
+Error norm-1   : 0.0000021486
+Error norm-2   : 0.0000026633
+Error norm-inf : 0.0000051505
+Solve : data/2-Dirichlet-regular-d64.json 
+Error norm-1   : 0.0000005535
+Error norm-2   : 0.0000006755
+Error norm-inf : 0.0000012896
+Solve : data/2-Dirichlet-regular-e128.json 
+Error norm-1   : 0.0000001405
+Error norm-2   : 0.0000001701
+Error norm-inf : 0.0000003224
+Solve : data/2-Neumann-irregular-a8.json 
+Error norm-1   : 0.0004516047
+Error norm-2   : 0.0005253797
+Error norm-inf : 0.0009957570
+Solve : data/2-Neumann-irregular-b16.json 
+Error norm-1   : 0.0001320545
+Error norm-2   : 0.0001549304
+Error norm-inf : 0.0003135226
+Solve : data/2-Neumann-irregular-c32.json 
+Error norm-1   : 0.0000330292
+Error norm-2   : 0.0000388122
+Error norm-inf : 0.0000947723
+Solve : data/2-Neumann-irregular-d64.json 
+Error norm-1   : 0.0000076640
+Error norm-2   : 0.0000090439
+Error norm-inf : 0.0000296268
+Solve : data/2-Neumann-irregular-e128.json 
+Error norm-1   : 0.0000019621
+Error norm-2   : 0.0000023123
+Error norm-inf : 0.0000090912
+Solve : data/2-Neumann-regular-a8.json 
+Error norm-1   : 0.0004110541
+Error norm-2   : 0.0004910139
+Error norm-inf : 0.0010001475
+Solve : data/2-Neumann-regular-b16.json 
+Error norm-1   : 0.0000996380
+Error norm-2   : 0.0001197352
+Error norm-inf : 0.0002542869
+Solve : data/2-Neumann-regular-c32.json 
+Error norm-1   : 0.0000243853
+Error norm-2   : 0.0000294091
+Error norm-inf : 0.0000638959
+Solve : data/2-Neumann-regular-d64.json 
+Error norm-1   : 0.0000060176
+Error norm-2   : 0.0000072694
+Error norm-inf : 0.0000218843
+Solve : data/2-Neumann-regular-e128.json 
+Error norm-1   : 0.0000014939
+Error norm-2   : 0.0000018058
+Error norm-inf : 0.0000071384
+Solve : data/2-mixed-irregular-a8.json 
+Error norm-1   : 0.0003383664
+Error norm-2   : 0.0004387686
+Error norm-inf : 0.0009271168
+Solve : data/2-mixed-irregular-b16.json 
+Error norm-1   : 0.0000763793
+Error norm-2   : 0.0000944316
+Error norm-inf : 0.0002011443
+Solve : data/2-mixed-irregular-c32.json 
+Error norm-1   : 0.0000191592
+Error norm-2   : 0.0000237475
+Error norm-inf : 0.0000517898
+Solve : data/2-mixed-irregular-d64.json 
+Error norm-1   : 0.0000048952
+Error norm-2   : 0.0000060061
+Error norm-inf : 0.0000130502
+Solve : data/2-mixed-irregular-e128.json 
+Error norm-1   : 0.0000012187
+Error norm-2   : 0.0000014939
+Error norm-inf : 0.0000032842
+Solve : data/2-mixed-regular-a8.json 
+Error norm-1   : 0.0001434238
+Error norm-2   : 0.0002114636
+Error norm-inf : 0.0005893512
+Solve : data/2-mixed-regular-b16.json 
+Error norm-1   : 0.0000357806
+Error norm-2   : 0.0000515577
+Error norm-inf : 0.0001500308
+Solve : data/2-mixed-regular-c32.json 
+Error norm-1   : 0.0000089706
+Error norm-2   : 0.0000127398
+Error norm-inf : 0.0000375852
+Solve : data/2-mixed-regular-d64.json 
+Error norm-1   : 0.0000022493
+Error norm-2   : 0.0000031678
+Error norm-inf : 0.0000094011
+Solve : data/2-mixed-regular-e128.json 
+Error norm-1   : 0.0000005634
+Error norm-2   : 0.0000007899
+Error norm-inf : 0.0000023508
+Solve : data/3-Dirichlet-irregular-a8.json 
+Error norm-1   : 0.0003328717
+Error norm-2   : 0.0005007493
+Error norm-inf : 0.0013517589
+Solve : data/3-Dirichlet-irregular-b16.json 
+Error norm-1   : 0.0000916380
+Error norm-2   : 0.0001354476
+Error norm-inf : 0.0004894465
+Solve : data/3-Dirichlet-irregular-c32.json 
+Error norm-1   : 0.0000229579
+Error norm-2   : 0.0000324529
+Error norm-inf : 0.0001331517
+Solve : data/3-Dirichlet-irregular-d64.json 
+Error norm-1   : 0.0000061440
+Error norm-2   : 0.0000086333
+Error norm-inf : 0.0000348202
+Solve : data/3-Dirichlet-irregular-e128.json 
+Error norm-1   : 0.0000014888
+Error norm-2   : 0.0000020749
+Error norm-inf : 0.0000091099
+Solve : data/3-Dirichlet-regular-a8.json 
+Error norm-1   : 0.0000567318
+Error norm-2   : 0.0000970118
+Error norm-inf : 0.0003132111
+Solve : data/3-Dirichlet-regular-b16.json 
+Error norm-1   : 0.0000162621
+Error norm-2   : 0.0000257743
+Error norm-inf : 0.0000798102
+Solve : data/3-Dirichlet-regular-c32.json 
+Error norm-1   : 0.0000043446
+Error norm-2   : 0.0000066373
+Error norm-inf : 0.0000203398
+Solve : data/3-Dirichlet-regular-d64.json 
+Error norm-1   : 0.0000011212
+Error norm-2   : 0.0000016845
+Error norm-inf : 0.0000050917
+Solve : data/3-Dirichlet-regular-e128.json 
+Error norm-1   : 0.0000002848
+Error norm-2   : 0.0000004244
+Error norm-inf : 0.0000012741
+Solve : data/3-Neumann-irregular-a8.json 
+Error norm-1   : 0.0015711770
+Error norm-2   : 0.0019066229
+Error norm-inf : 0.0049055603
+Solve : data/3-Neumann-irregular-b16.json 
+Error norm-1   : 0.0003633836
+Error norm-2   : 0.0004429814
+Error norm-inf : 0.0013200887
+Solve : data/3-Neumann-irregular-c32.json 
+Error norm-1   : 0.0000984425
+Error norm-2   : 0.0001213008
+Error norm-inf : 0.0004608332
+Solve : data/3-Neumann-irregular-d64.json 
+Error norm-1   : 0.0000235582
+Error norm-2   : 0.0000289521
+Error norm-inf : 0.0001225718
+Solve : data/3-Neumann-irregular-e128.json 
+Error norm-1   : 0.0000063243
+Error norm-2   : 0.0000078485
+Error norm-inf : 0.0000416739
+Solve : data/3-Neumann-regular-a8.json 
+Error norm-1   : 0.0014096932
+Error norm-2   : 0.0017683404
+Error norm-inf : 0.0048837377
+Solve : data/3-Neumann-regular-b16.json 
+Error norm-1   : 0.0003474472
+Error norm-2   : 0.0004403135
+Error norm-inf : 0.0015047586
+Solve : data/3-Neumann-regular-c32.json 
+Error norm-1   : 0.0000855085
+Error norm-2   : 0.0001088099
+Error norm-inf : 0.0004440467
+Solve : data/3-Neumann-regular-d64.json 
+Error norm-1   : 0.0000211459
+Error norm-2   : 0.0000269297
+Error norm-inf : 0.0001277889
+Solve : data/3-Neumann-regular-e128.json 
+Error norm-1   : 0.0000052523
+Error norm-2   : 0.0000066869
+Error norm-inf : 0.0000361171
+Solve : data/3-mixed-irregular-a8.json 
+Error norm-1   : 0.0005085634
+Error norm-2   : 0.0006781679
+Error norm-inf : 0.0014729648
+Solve : data/3-mixed-irregular-b16.json 
+Error norm-1   : 0.0001409462
+Error norm-2   : 0.0001889625
+Error norm-inf : 0.0004973155
+Solve : data/3-mixed-irregular-c32.json 
+Error norm-1   : 0.0000340980
+Error norm-2   : 0.0000456253
+Error norm-inf : 0.0001379552
+Solve : data/3-mixed-irregular-d64.json 
+Error norm-1   : 0.0000088528
+Error norm-2   : 0.0000118392
+Error norm-inf : 0.0000352076
+Solve : data/3-mixed-irregular-e128.json 
+Error norm-1   : 0.0000021579
+Error norm-2   : 0.0000028953
+Error norm-inf : 0.0000092004
+Solve : data/3-mixed-regular-a8.json 
+Error norm-1   : 0.0002961858
+Error norm-2   : 0.0004033581
+Error norm-inf : 0.0010210589
+Solve : data/3-mixed-regular-b16.json 
+Error norm-1   : 0.0000738780
+Error norm-2   : 0.0000981259
+Error norm-inf : 0.0002578824
+Solve : data/3-mixed-regular-c32.json 
+Error norm-1   : 0.0000184681
+Error norm-2   : 0.0000241862
+Error norm-inf : 0.0000646856
+Solve : data/3-mixed-regular-d64.json 
+Error norm-1   : 0.0000046196
+Error norm-2   : 0.0000060043
+Error norm-inf : 0.0000161866
+Solve : data/3-mixed-regular-e128.json 
+Error norm-1   : 0.0000011555
+Error norm-2   : 0.0000014960
+Error norm-inf : 0.0000040473

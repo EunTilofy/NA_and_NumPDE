@@ -1,0 +1,19 @@
+{
+    "BC_Type" : "Neumann",
+    "Center" : [ 0.52, 0.52 ],
+    "Domain_Border" : [ 0.0, 1.0, 0.0, 1.0 ],
+    "Domain_Type" : "Irregular",
+    "Grid_n" : 128,
+    "Need_Error" : true,
+    "R" : 0.21,
+    "answer" : "exp(sin(x)+y)",
+    "f" : "-(1-sin(x)+cos(x)*cos(x))*exp(sin(x)+y)",
+    "g" : {
+       "D" : "cos(x)*exp(sin(x)+y)*(x-0.52)/0.21+exp(sin(x)+y)*(y-0.52)/0.21",
+       "down" : "-exp(sin(x))",
+       "left" : "-exp(y)",
+       "right" : "cos(1)*exp(sin(1)+y)",
+       "up" : "exp(sin(x)+1)"
+    }
+ }
+ 

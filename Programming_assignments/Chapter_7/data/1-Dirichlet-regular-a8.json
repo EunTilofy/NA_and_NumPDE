@@ -1,0 +1,10 @@
+{
+    "BC_Type": "Dirichlet",
+    "Domain_Type": "Regular",
+    "Domain_Border": [0, 1, 0, 1],
+    "Grid_n": 8,
+    "f": "-(1-sin(x)+cos(x)*cos(x))*exp(sin(x)+y)",
+    "g": {"all":  "exp(sin(x)+y)"},
+    "Need_Error": true,
+    "answer": "exp(sin(x)+y)"
+}

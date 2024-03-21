@@ -5,20 +5,34 @@
 #include "function.hpp"
 #include "function_generator/ExecCode2.hpp"
 
-void breakline() {
-    cerr << "-------------------------------------------\n";
+void warning() {
+    cerr << "usage: ./test [-v|--verbose] <input JSON file>\n";
+    exit(1);
 }
 
-int main() {
+std::string getName(std::string s) {
+    for(auto &ch : s) {
+        if(ch == '/') ch = '|';
+    }
+    s.erase(s.size() - 5);
+    return s;
+}
+
+int main(int argc, char ** argv) {
     Square_BVPsolver solver;
-    // solver.solveProblem("data/1-Dirichlet-regular.json", /*print*/ 1);
-    // solver.solveProblem("data/1-Neumann-regular.json", /*print*/ 1);
-    // solver.solveProblem("data/1-mixed-regular.json", /*print*/ 1);
-    // solver.solveProblem("data/1-Dirichlet-irregular.json", /*print*/1);
-    // solver.solveProblem("data/1-Neumann-irregular.json", /*print*/ 1);
-    // solver.solveProblem("data/1-Neumann-irregular2.json", /*print*/ 1);
-    solver.solveProblem("data/1-mixed-irregular.json", /*print*/ 1);
-    // breakline();
-    solver.solveProblem("data/1-mixed-irregular2.json", /*print*/ 1);
+    if(argc <= 1) warning();
+    bool print = 0;
+    int i = 1;
+    if(std::string(argv[i]) == "-v" || std::string(argv[i]) == "--verbose") ++i, print = 1;;
+    if(argc <= i) warning();
+    
+    for(; i < argc; ++i) {
+        ofstream OUT("result-["+std::string(argv[i])+"].out");
+        std::cerr << "\033[0;32mSolve : " << argv[i] << " \033[0m" << std::endl;
+        solver.solveProblem(argv[i], print);
+        solver.saveResults("res/res-["+getName(argv[i])+"].csv");
+        OUT.close();
+    }
+    
     return 0;
 }
