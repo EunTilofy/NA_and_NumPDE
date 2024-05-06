@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+using namespace std;
 #include "BVP.hpp"
 #include "linear.hpp"
 #include "calculator.hpp"

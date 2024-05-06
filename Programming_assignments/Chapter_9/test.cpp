@@ -5,36 +5,43 @@
 #include "function.hpp"
 #include "function_generator/ExecCode2.hpp"
 
-void breakline() {
-    cerr << "-------------------------------------------\n";
+void warning()
+{
+    cerr << "usage: ./test [-v|--verbose] <input JSON file>\n";
+    exit(1);
 }
 
-using namespace linear;
+string getName(string s)
+{
+    for(auto &ch : s)
+    {
+        if(ch == '/') ch = '|';
+    }
+    s.erase(s.size() - 5); // remove ".json"
+    return s;
+}
 
-int main() {
+int main(int argc, char ** argv) {
     Multigrid_BVPsolver solver;
-    // solver.solveProblem("data/1-DFlf-16.json", /*print*/ 1);
-    // solver.solveProblem("data/1-DVli-16.json", /*print*/ 1);
-    // solver.solveProblem("data/1-mFlf-16.json", /*print*/ 1);
-    // solver.solveProblem("data/1-mVlf-16.json", /*print*/ 1);
-    // solver.solveProblem("data/1-NFli-16.json", /*print*/ 1);
-    // solver.solveProblem("data/1-NVli-16.json", /*print*/ 1);
+    if(argc <= 1) warning();
+    bool print = 0;
+    int i = 1;
+    if(string(argv[i]) == "-v" || string(argv[i]) == "--verbose") ++i, print = 1;
+    if(argc <= i) warning();
 
-    // solver.solveProblem("data/1-DFlf-32.json", /*print*/ 1);
-    // solver.solveProblem("data/1-DVli-32.json", /*print*/ 1);
-    // solver.solveProblem("data/1-mFlf-32.json", /*print*/ 1);
-    // solver.solveProblem("data/1-mVlf-32.json", /*print*/ 1);
-    // solver.solveProblem("data/1-NFli-32.json", /*print*/ 1);
-    // solver.solveProblem("data/1-NVli-32.json", /*print*/ 1);
+    for(; i < argc; ++i)
+    {
+        ofstream OUT("result-["+std::string(argv[i])+"].out");
+        std::cerr << "\033[0;32mSolve : " << argv[i] << " \033[0m" << std::endl;
+        clock_t _start, _end;
+        _start = clock();
+        solver.solveProblem(argv[i], print);
+        _end = clock();
+        double dur = (double) (_end - _start) / CLOCKS_PER_SEC;
+        std::cerr << "time cost (sec): " << dur << std::endl;
+        solver.saveResults("res/res-["+getName(argv[i])+"].csv");
+        OUT.close();
+    }
 
-    // solver.solveProblem("data/1-mFlf-512.json", /*print*/ 1);
-    // solver.solveProblem("data/1-NVqi-512.json", /*print*/ 1);
-
-    // solver.solveProblem("data/2-DVlf-8.json", 1);
-    solver.solveProblem("data/2-DVlf-512.json", 1);
-    // solver.solveProblem("data/2-DVlf-32.json", 1);
-    // solver.solveProblem("data/2-mFli-16.json", 1);
-    // solver.solveProblem("data/2-mFli-32.json", 1);
-    // solver.solveProblem("data/2-NFqf-16.json", 1);
-    // solver.solveProblem("data/2-NFqf-32.json", 1);
+    return 0;
 }

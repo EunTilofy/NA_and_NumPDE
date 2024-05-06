@@ -1,0 +1,22 @@
+{
+   "Accuracy" : 9.9999999999999998e-13,
+   "BC_Type" : "Neumann",
+   "Cycle_Type" : "FMG",
+   "Dimension" : 2,
+   "Domain_Border" : [ 0.0, 1.0, 0.0, 1.0 ],
+   "Domain_Type" : "Regular",
+   "Grid_n" : 256,
+   "Interpolation_opt" : "quadratic",
+   "Max_Iteration" : 20,
+   "Need_Error" : true,
+   "Restriction_opt" : "full_weight",
+   "answer" : "exp(sin(x) + y)",
+   "f" : "exp(sin(x) + y) * (sin(x) - cos(x) * cos(x) - 1)",
+   "g" : {
+      "down" : "-exp(sin(x))",
+      "left" : "-exp(y)",
+      "right" : "cos(1) * exp(sin(1) + y)",
+      "up" : "exp(sin(x) + 1)"
+   },
+   "initial_guess" : "0"
+}

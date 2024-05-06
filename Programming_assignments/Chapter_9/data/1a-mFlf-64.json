@@ -1,0 +1,20 @@
+{
+   "Accuracy" : 1e-08,
+   "BC_Type" : "mixed",
+   "Cycle_Type" : "FMG",
+   "Dimension" : 1,
+   "Domain_Border" : [ 0.0, 1.0 ],
+   "Domain_Type" : "Regular",
+   "Grid_n" : 64,
+   "Interpolation_opt" : "linear",
+   "Max_Iteration" : 20,
+   "Need_Error" : true,
+   "Restriction_opt" : "full_weight",
+   "answer" : "exp(sin(x))",
+   "f" : "exp(sin(x)) * (sin(x) - cos(x) * cos(x))",
+   "initial_guess" : "0",
+   "mixed_g" : {
+      "left" : [ "Neumann", "-1" ],
+      "right" : [ "Dirichlet", "exp(sin(1))" ]
+   }
+}

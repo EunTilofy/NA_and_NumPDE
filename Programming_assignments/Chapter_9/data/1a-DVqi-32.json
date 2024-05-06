@@ -1,0 +1,20 @@
+{
+   "Accuracy" : 1e-08,
+   "BC_Type" : "Dirichlet",
+   "Cycle_Type" : "V",
+   "Dimension" : 1,
+   "Domain_Border" : [ 0.0, 1.0 ],
+   "Domain_Type" : "Regular",
+   "Grid_n" : 32,
+   "Interpolation_opt" : "quadratic",
+   "Max_Iteration" : 20,
+   "Need_Error" : true,
+   "Restriction_opt" : "injection",
+   "answer" : "exp(sin(x))",
+   "f" : "exp(sin(x)) * (sin(x) - cos(x) * cos(x))",
+   "g" : {
+      "left" : "1",
+      "right" : "exp(sin(1))"
+   },
+   "initial_guess" : "0"
+}

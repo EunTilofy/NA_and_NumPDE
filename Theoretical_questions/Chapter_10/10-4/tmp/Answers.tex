@@ -1,0 +1,378 @@
+\documentclass[lang=cn,a4paper,newtx,bibend=bibtex]{elegantpaper}
+\usepackage{env}
+\title{Problems of Chapter 10.6.1-10.6.4}
+\author{张志心 \ 计科2106}
+\date{\zhdate{2024/05/06}}
+\usepackage{env}
+\pgfplotsset{compat=1.17}
+\addbibresource[location=local]{reference.bib}
+\begin{document}
+\maketitle
+
+\begin{prob}[Exercise 10.179]
+  Write down the Butcher tableaux of the modified Euler method,
+  the improved Euler method, and Heun's third-order method in Definition 10.186.
+\end{prob}
+
+\begin{solution}~~\\
+\begin{enumerate}[(1)]
+  \item modified Euler method:
+    \begin{table*}[h!]
+      \begin{center}
+        \begin{tabular}{c|cc}
+          $0$ & $0$ & $0$ \\
+          $\frac 12$ & $\frac 12$ & $0$ \\
+          \hline
+          & $0$ & $1$ \\
+        \end{tabular}
+      \end{center}
+    \end{table*}
+  \item improved Euler method:
+    \begin{table*}[h!]
+      \begin{center}
+        \begin{tabular}{c|cc}
+          $0$ & $0$ & $0$ \\
+          $1$ & $1$ & $0$ \\
+          \hline
+          & $\frac 12$ & $\frac 12$ \\
+        \end{tabular}
+      \end{center}
+    \end{table*}
+  \item Heun's third-order method:
+    \begin{table*}[h!]
+      \begin{center}
+        \begin{tabular}{c|ccc}
+          $0$ & $0$ & $0$ & $0$ \\
+          $\frac 13$ & $\frac 13$ & $0$ & $0$ \\
+          $\frac 23$ & $0$ & $\frac 23$ & $0$ \\
+          \hline
+          & $\frac 14$ & $0$ & $\frac 34$ \\
+        \end{tabular}
+      \end{center}
+    \end{table*}
+\end{enumerate}
+\end{solution}
+
+\begin{prob}[Exercise 10.180]
+  Verify that the RK method (10.122) can be rewritten as
+  \begin{equation}
+    \left\{
+    \begin{aligned}
+      \xiB = \UB^n + k\sum_{j=1}^s a_{i,j}\fB(\xiB_j, t_n+c_jk), \\
+      \UB^{n+1} = \UB^n + k\sum_{j=1}^s b_j\fB(\xiB_j, t_n+c_jk), \\
+    \end{aligned}
+    \right.
+  \end{equation}
+  where $i = 1, 2, \dots, s$.
+\end{prob}
+
+\begin{solution}
+  在Def 10.177 中令 $\yB_i = \fB(\xiB_i, t_n+c_ik)$，则
+  \begin{equation*}
+    \fB(\xiB_i, t_n+c_ik) = \fB(\UB^n + k\sum_{j=1}^s a_{i,j}\fB(\xiB_j, t_n+c_jk), t_n+c_jk).
+  \end{equation*}
+  因此取 $\xiB_i = \UB^n + k\sum_{j=1}^s a_{ij}\fB(\xiB_j, t_n+c_jk)$
+  则 Definition 10.177 中第一式成立。
+  又由第二式得
+  \begin{equation*}
+    \UB^{n+1} = \UB^n + k\sum_{j=1}^s b_j\fB(\xiB_j, t_n+c_jk) = \UB^n + k\sum_{j=1}^s b_j\yB_j,
+  \end{equation*}
+  因此 10.177 第二式也成立。
+  反之，若 Def 10.177 成立，则令 $\xiB_i$ 为方程 $\yB_i = \fB(\xiB_i, t_n+c_ik)$ 的任意一组解，即得本题定义。
+  故本题定义与 10.177 的定义等价。
+\end{solution}
+
+\begin{prob}[Exercise 10.187]
+  There are three one-parameter families of
+  third-order three-stage ERK methods,
+  one of which is
+  \begin{tabular}{c|ccc}
+    $0$ & $0$ & $0$ & $0$ \\
+    $\frac 23$ & $\frac 23$ & $0$ & $0$ \\
+    $\frac 23$ & $\frac 23 - \frac{1}{4\alpha}$ & $\frac{1}{4\alpha}$ & $0$ \\
+    \hline
+    & $\frac 14$ & $\frac 34 - \alpha$ & $\alpha$ \\
+  \end{tabular}
+  where $\alpha$ is the free parameter.
+  Derive the above family.
+  Does Heun's third-order formula belong to this family?
+\end{prob}
+
+\begin{solution}
+  设 3-stage ERK 方法的 Butcher tableau 为：
+  \begin{table*}[h!]
+    \begin{center}
+      \begin{tabular}{c|ccc}
+        $0$ & $0$ & $0$ & $0$ \\
+        $c_2$ & $c_2$ & $0$ & $0$ \\
+        $c_3$ & $a_{3,1}$ & $a_{3,2}$ & $0$ \\
+        \hline
+        & $b_1$ & $b_2$ & $b_3$ \\
+      \end{tabular}
+    \end{center}
+  \end{table*}
+
+  其中$a_{3,1}+a_{3,2}=c_3$。则
+  \begin{equation*}
+    \left\{
+    \begin{aligned}
+      & \yB_1 = \fB(\UB^n, t_n), & \\
+      & \yB_2 = \fB(\UB^n + kc_2\yB_1, t_n+c_2k), & \\
+      & \yB_3 = \fB(\UB^n + ka_{3,1}\yB_1 + ka_{3,2}\yB_2, t_n+c_3k), & \\
+      & \UB^{n+1} = \UB^n + k(b_1\yB_1 + b_2\yB_2 + b_3\yB_3). &
+    \end{aligned}
+    \right.
+  \end{equation*}
+  
+  由 Example 10.153 有
+  \begin{equation*}
+    \begin{aligned}
+      \uB' = & \fB, & \\
+      \uB'' = & \fB_u + \fB_t, & \\
+      \uB''' = & \fB_u^2\fB + \fB_{\uB\uB}\fB^2 + \fB_u\fB_t + 2\fB_{\uB t} + \fB_{tt}. & \\
+    \end{aligned}
+  \end{equation*}
+
+  计算截断误差得（以下简记 $\uB(t_n) = \uB, \fB(\uB(t_n), t_n) = \fB$，各阶导数和偏导数同理）：
+  \begin{equation*}
+    \begin{aligned}
+      & \LM(\uB(t_n)) & \\
+      = & \uB(t_{n+1}) - \uB(t_n)
+      - kb_1\fB(\uB(t_n), t_n)
+      - kb_2\fB(\uB(t_n) + kc_2\yB_1, t_n+c_2k)
+      - kb_3\fB(\uB(t_n) + ka_{3,1}\yB_1 + ka_{3,2}\yB_2, t_n+c_3k) & \\
+      = & (\uB + k\uB' + \frac{k^2}{2}\uB'' + \frac{k^3}{6}\uB''' + O(k^4)) - u
+      - kb_1\uB'
+      - kb_2(\fB + kc_2(\fB_{\uB}\fB + \fB_t) + \frac 12 k^2c_2^2(\fB_{tt} + 2\fB_{\uB t}\fB + \fB_{\uB\uB}\fB^2) + O(k^3)) & \\
+      & - kb_3(\fB + k(a_{3,1}\fB_{\uB}\fB + a_{3,2}(\fB + kc_2\fB_{\uB}\fB + kc_2\fB_t)\fB_{\uB} + c_3\fB_t) + \frac{k^2c_3^2}2(\fB_{\uB\uB}\fB^2 + 2\fB_{\uB t}\fB + \fB_{tt})) + O(k^4) & \\
+      = & k(1 - b_1 - b_2 - b_3)\uB' + k^2(\frac 12 - b_2c_2 - b_3c_3)\uB'' & \\
+      & + k^3(\frac 16 \uB''' - \frac 12(b_2c_2^2 + b_3c_3^2)(\fB_{\uB\uB}\fB^2 + 2\fB_{\uB t}\fB + \fB_{tt}) - a_{3,2}b_3c_2(\fB_{\uB}^2\fB + \fB_t\fB_{\uB})) + O(k^4) & \\
+    \end{aligned}
+  \end{equation*}
+  要使该方法达到三阶收敛，需要 $\LM(\uB(t_n)) = O(k^4)$。
+
+  由$\uB$的任意性，比较对应系数可知
+  \begin{equation*}
+    \begin{aligned}
+      b_1 + b_2 + b_3 = & 1, & \\
+      b_2c_2 + b_3c_3 = & \frac 12, & \\
+      a_{3,2}b_3c_2 = & \frac 16, & \\
+      b_2c_2^2 + b_3c_3^2 = & \frac 13. & \\
+    \end{aligned}
+  \end{equation*}
+  上述方程组有六个未知量但只有四个方程，因此至少有两个自由元。
+  令 $c_3 = \frac 23, b_3 = \alpha$，解剩余的方程可得
+  \begin{equation*}
+    \begin{aligned}
+      b_1 = \frac 14, & \\
+      b_2 = \frac 34 - \alpha, & \\
+      c_2 = \frac 23, & \\
+      a_{3,2} = \frac 1{4\alpha}. & \\        
+    \end{aligned}
+  \end{equation*}
+  即题中给出的 Butcher tableau。
+  Heun's third-stage method显然不属于这族方法，因为$c_2 = \frac 13 \neq \frac 23$。
+\end{solution}
+
+\begin{prob}[Exercise 10.193]
+  Show that the quadrature formula of a RK method is exact
+  for all polynomials $f$ of degree $<r$, i.e.,
+  \begin{equation*}
+    \forall f\in \mathbb{P}_{r-1}, I_s(f) = \Int{t_n}{t_n+k}{f(t)}{t},
+  \end{equation*}
+  if and only if the RK method is $B(r)$.
+\end{prob}
+
+\begin{solution}
+  $\Rightarrow$: 
+  取 $t_n=0, p(t) = t^{l-1}$，因为
+  \begin{equation*}
+    \begin{aligned}
+      & \frac{k^l}{l}
+      = \Int{0}{k}{t^{l-1}}{t} 
+      = k\sum_{j=1}^s b_j(c_jk)^{l-1} 
+      = k^l\sum_{j=1}^s b_jc_j^{l-1}
+    \end{aligned}
+  \end{equation*}
+  所以
+  \begin{equation*}
+    \sum_{j=1}^s b_jc_j^{l-1} = \frac 1l.
+  \end{equation*}
+  即满足 $B(r)$。
+
+  $\Leftarrow$: 
+  只需证明等式对一切$f(t)=t^l, 0\leq l\leq r-1$ 成立。即
+  \begin{equation*}
+    \forall 0\leq l\leq r-1, k\sum_{j=1}^s b_j(t_n+c_jk)^l = \Int{t_n}{t_n+k}{t^l}{t}    
+  \end{equation*}
+  因为 RK method 具有性质 $B(r)$，所以根据 Definition 10.191 有
+  \begin{equation*}
+    \forall l = 1,2,\dots, r, \sum_{j=1}^s b_jc_j^{l-1} = \frac 1l.
+  \end{equation*}
+  计算可知
+  \begin{equation*}
+    \begin{aligned}
+      k\sum_{j=1}^s b_j(t_n+c_jk)^l
+      = k\sum_{j=1}^s b_j\sum_{m=0}^l \binom lm t_n^m (c_jk)^{l-m} 
+      = k\sum_{m=0}^l \binom lm t_n^m k^{l-m} \frac{1}{l-m+1} 
+      = \sum_{m=0}^l \dfrac{\binom lm t_n^m k^{l-m+1}}{l-m+1} 
+    \end{aligned}
+  \end{equation*}
+  另一方面，
+  \begin{equation*}
+    \begin{aligned}
+      & \Int{t_n}{t_n+k}{t^l}{t} 
+      =  \dfrac{t^{l+1}}{l+1}\bigg|_{t_n}{t_n+k} 
+      =  \frac{1}{l+1}((t_n+k)^{l+1} - t_n^{l+1}) 
+      =  \frac{1}{l+1}\sum_{m=0}^l \binom{l+1}{m} t_n^m k^{l-m+1} 
+      =  \sum_{m=0}^l \frac{1}{l-m+1}\binom lm t_n^m k^{l-m+1} 
+    \end{aligned}
+  \end{equation*}
+  二者相等。故求积式至少有$r-1$阶代数精度。
+\end{solution}
+
+\begin{prob}[Exercise 10.210]
+  Show that an $s$-stage collocation method is at least $s$-order accurate.
+\end{prob}
+
+\begin{solution}
+  只需证明在初值精确的前提下组合方法对任意线性方程$u'(t) = q(t), q\in \mathbb{P}_{s-1}$均精确。
+  $U^0 = u(t_0)$。归纳证明$U^n = u(t_n)$。
+  根据 Definition 10.207 可知，对任意 $i=1,2,\dots,s$，均有
+  \begin{equation*}
+    p'(t_n+c_ik) = q(t_n+c_ik) = u'(t_n+c_ik).
+  \end{equation*}
+  且$p(t_n) = U^n = u(t_n)$。
+  这是一个关于$u$（或$p$）的给定$s+1$个条件的Hermite插值问题。
+  根据 Definition 10.207，$p\in \mathbb{P}_s$。
+  又因为 $u(t) = U^0 + \Int{t_0}{t}{q(t)}{t}$，所以 $u\in \mathbb{P}_s$。
+  $s$次插值多项式由$s+1$个插值条件$u(t_n), q(t_n+c_ik)$唯一确定。
+  因此在区间 $[t_n, t_n+k]$ 上 $p=u$。即 $u(t_{n+1}) = u(t_n+k) = U^{n+1} = p(t_{n+1})$。
+  因此组合方法对多项式 $q$ 精确。故至少有 $s$ 阶精度。
+\end{solution}
+
+\begin{prob}[Exercise 10.211]
+  Prove that the collocation method viewed as an RK method satisfies (10.125) and (10.126).
+\end{prob}
+
+\begin{solution}
+  由 Theorem 10.209 可知
+  \begin{equation*}
+    a_{ij} = \Int{0}{c_i}{l_j(\tau)}{\tau}, b_j = \Int{0}{1}{l_j(\tau)}{\tau}.
+  \end{equation*}
+  又由 Lemma 2.13（Cauchy relations）可得
+  \begin{equation*}
+    \sum_{j=1}^s \Int{0}{c}{l_j(\tau)}{\tau} = \Int{0}{c}{\sum_{j=1}^sl_j(\tau)}{\tau} = \Int{0}{c}{1}{\tau} = c, \forall c\in \mathbb{R}.
+  \end{equation*}
+  所以 $c_i = \sum_{j=1}^s a_{ij}, \sum_{j=1}^s b_j = 1$.
+\end{solution}
+\newpage
+
+\begin{prob}[Exercise 10.213]
+  Derive the three-stage IRK method that corresponds to the
+  collocation points $c_1=\frac 14, c_2=\frac 12, c_3=\frac 34$.
+\end{prob}
+
+\begin{solution}
+  \begin{equation*}
+    \begin{aligned}
+      l_1(t)  = & \dfrac{(t-\frac 12)(t-\frac 34)}{(\frac 14-\frac 12)(\frac 14-\frac 34)} = 8t^2-10t+3. & \\
+      l_2(t)  = & \dfrac{(t-\frac 14)(t-\frac 34)}{(\frac 12-\frac 34)(\frac 12-\frac 34)} = -16t^2+16t-3. & \\
+      l_3(t)  = & \dfrac{(t-\frac 14)(t-\frac 12)}{(\frac 34-\frac 14)(\frac 34-\frac 12)} = 8t^2-6t+1. & \\
+      b_1     = & \Int{0}{1}{l_1(\tau)}{\tau} = \frac 23. & \\
+      a_{1,1} = & \Int{0}{c_1}{l_1(\tau)}{\tau} = \frac {23}{48}. & \\
+      a_{2,1} = & \Int{0}{c_2}{l_1(\tau)}{\tau} = \frac {7}{12}. & \\
+      a_{3,1} = & \Int{0}{c_3}{l_1(\tau)}{\tau} = \frac {9}{16}. & \\
+      b_2     = & \Int{0}{1}{l_2(\tau)}{\tau} = -\frac 13. & \\
+      a_{1,2} = & \Int{0}{c_1}{l_2(\tau)}{\tau} = -\frac 13. & \\
+      a_{2,2} = & \Int{0}{c_2}{l_2(\tau)}{\tau} = -\frac 16. & \\
+      a_{3,2} = & \Int{0}{c_3}{l_2(\tau)}{\tau} = 0. & \\
+      b_3     = & \Int{0}{1}{l_3(\tau)}{\tau} = \frac 23. & \\
+      a_{1,3} = & \Int{0}{c_1}{l_3(\tau)}{\tau} = \frac {5}{48}. & \\
+      a_{2,3} = & \Int{0}{c_2}{l_3(\tau)}{\tau} = \frac {1}{12}. & \\
+      a_{3,3} = & \Int{0}{c_3}{l_3(\tau)}{\tau} = \frac {3}{16}. & \\
+    \end{aligned}
+  \end{equation*}
+  因此导出的组合方法的 Butcher tableau 为：
+  \begin{table*}[h!]
+    \begin{center}
+      \begin{tabular}{c|ccc}
+        $\frac 14$ & $\frac {23}{48}$ & $-\frac 13$ & $\frac {5}{48}$ \\
+        $\frac 12$ & $\frac {7}{12}$ & $-\frac 13$ & $\frac {1}{12}$ \\
+        $\frac 34$ & $\frac {9}{16}$ & $0$ & $\frac {3}{16}$ \\
+        \hline
+        & $\frac 23$ & $-\frac 13$ & $\frac 23$ \\
+      \end{tabular}
+    \end{center}
+  \end{table*}
+\end{solution}
+
+\newpage 
+\begin{prob}[Exercise 10.216]
+  Show $B(s+r)$ and $C(s)$ imply $D(r)$ via multiplying the two vectors
+  $u_j := \sum_{i=1}^s b_ic_i^{m-1}a_{i,j}$ and $v_j := \frac 1m b_j(1-c_j^m)$
+  by the Vandermonde matrix $V(c_1,c_2,\dots,c_s)$ in Definition 2.3.
+\end{prob}
+
+\begin{solution}
+  设 $(a_{ij}),(b_j),(c_i)$ 满足性质 $B(s+r)$ 和 $C(s)$，令
+  \begin{equation*}
+    \begin{aligned}
+      \uB^{(m)} & = [u_1^{(m)}, \dots, u_s^{(m)}]^T, 
+      \vB^{(m)} = [v_1^{(m)}, \dots, v_s^{(m)}]^T, 
+      u_j^{(m)} = \sum_{i=1}^s b_ic_i^{m-1}a_{i,j},
+      v_j^{(m)} = \frac 1m b_j(1-c_j^m), & \\
+      V = & V(c_1,c_2,\dots,c_s) =
+      \begin{bmatrix}
+        1 & 1 & \dots & 1 \\
+        c_1 & c_2 & \dots c_s \\
+        \dots & \dots & \dots & \dots \\
+        c_1^{s-1} & c_2^{s-1} & \dots c_s^{s-1} \\
+      \end{bmatrix}. &
+    \end{aligned}
+  \end{equation*}
+  则
+  \begin{equation*}
+    \begin{aligned}
+      & (V\uB^{(m)})_j 
+      = \sum_{l=1}^s c_l^{j-1}\sum_{i=1}^s b_ic_i^{m-1}a_{il}
+      = \sum_{i=1}^s b_ic_i^{m-1}\sum_{l=1}^s c_l^{j-1}a_{il}
+      = \sum_{i=1}^s b_ic_i^{m-1}\frac{c_i^j}{j}
+      = \frac 1j\sum_{i=1}^s b_ic_i^{m+j-1}
+      = \frac 1{j(m+j)} ,
+    \end{aligned}
+  \end{equation*}
+  且
+  \begin{equation*}
+    \begin{aligned}
+      & (V\vB^{(m)})_j 
+      = \frac 1m\sum_{l=1}^s c_l^{j-1}b_j(1-c_j^m) 
+      = \frac 1m(\sum_{l=1}^s b_jc_l^{j-1} - \sum_{l=1}^s b_jc_l^{m+j-1}) 
+      = \frac 1m(\frac 1j - \frac 1{m+j}) 
+      = \frac 1{j(m+j)}
+    \end{aligned}
+  \end{equation*}
+  所以对任意的 $m=1,2,\dots,r$，均有 $V\uB^{(m)} = V\vB^{(m)}$。
+  因为范德蒙德矩阵$V$一定可逆，所以$\uB^{(m)} = \vB^{(m)}$。
+  根据 Definition 10.214，$D(r)$ 成立。
+\end{solution}
+
+\begin{prob}[Exercise 10.220]
+  Determine the order of accuracy of the collocation method derived in Exercise 10.213.
+\end{prob}
+
+\begin{solution}
+  \begin{equation*}
+    \begin{aligned}
+      q_r(x) = & (x-\frac 14)(x-\frac 12)(x-\frac 34) = x^3 - \frac 32 x^2 + \frac{11}{16} x - \frac{3}{32}. & \\
+      & \Int{0}{1}{q_r(x)}{x} = 0 & \\
+      & \Int{0}{1}{xq_r(x)}{x} =  \frac{7}{960} \neq 0 & \\
+    \end{aligned}
+  \end{equation*}
+  因此组合求积式的精度为$3+1=4$阶。
+\end{solution}
+
+\nocite{*}
+\printbibliography[heading=bibintoc, title=\ebibname]
+
+\end{document}

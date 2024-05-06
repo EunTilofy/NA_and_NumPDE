@@ -1,0 +1,20 @@
+{
+   "Accuracy" : 9.9999999999999998e-13,
+   "BC_Type" : "mixed",
+   "Cycle_Type" : "FMG",
+   "Dimension" : 1,
+   "Domain_Border" : [ 0.0, 1.0 ],
+   "Domain_Type" : "Regular",
+   "Grid_n" : 32,
+   "Interpolation_opt" : "quadratic",
+   "Max_Iteration" : 20,
+   "Need_Error" : true,
+   "Restriction_opt" : "injection",
+   "answer" : "log(1 + x*x)",
+   "f" : "-2 * (1 - x*x) / ((1 + x*x) * (1 + x*x))",
+   "initial_guess" : "0",
+   "mixed_g" : {
+      "left" : [ "Neumann", "0" ],
+      "right" : [ "Dirichlet", "log(2)" ]
+   }
+}

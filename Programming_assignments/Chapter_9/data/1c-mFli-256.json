@@ -1,0 +1,20 @@
+{
+   "Accuracy" : 9.9999999999999998e-13,
+   "BC_Type" : "mixed",
+   "Cycle_Type" : "FMG",
+   "Dimension" : 1,
+   "Domain_Border" : [ 0.0, 1.0 ],
+   "Domain_Type" : "Regular",
+   "Grid_n" : 256,
+   "Interpolation_opt" : "linear",
+   "Max_Iteration" : 20,
+   "Need_Error" : true,
+   "Restriction_opt" : "injection",
+   "answer" : "sin(x) * sin(x)",
+   "f" : "-2 * cos(2*x)",
+   "initial_guess" : "0",
+   "mixed_g" : {
+      "left" : [ "Neumann", "0" ],
+      "right" : [ "Dirichlet", "sin(1) * sin(1)" ]
+   }
+}

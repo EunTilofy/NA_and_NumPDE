@@ -1,0 +1,20 @@
+{
+   "Accuracy" : 9.9999999999999998e-13,
+   "BC_Type" : "Dirichlet",
+   "Cycle_Type" : "V",
+   "Dimension" : 1,
+   "Domain_Border" : [ 0.0, 1.0 ],
+   "Domain_Type" : "Regular",
+   "Grid_n" : 256,
+   "Interpolation_opt" : "quadratic",
+   "Max_Iteration" : 20,
+   "Need_Error" : true,
+   "Restriction_opt" : "full_weight",
+   "answer" : "sin(x) * sin(x)",
+   "f" : "-2 * cos(2*x)",
+   "g" : {
+      "left" : "0",
+      "right" : "sin(1) * sin(1)"
+   },
+   "initial_guess" : "0"
+}

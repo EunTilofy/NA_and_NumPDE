@@ -70,6 +70,10 @@ public:
     std::string f; /* - \Delta u (in Domain)*/
     func F;
 
+    // initial guess
+    std::string initial_guess;
+    func Initial_guess;
+
     // calculate error
     bool Need_Error;
     std::string answer;
@@ -93,10 +97,10 @@ public:
     NUM Accuracy;
 
     Multigrid_BVP_Problem() : 
-        Domain_Border({0, 1, 0, 1}), Domain_Type("Regular"), Max_Iteration(20), Accuracy(1e-10), Need_Error(0) {}
+        Domain_Border({0, 1, 0, 1}), Domain_Type("Regular"), Max_Iteration(20), Accuracy(1e-10), Need_Error(0), initial_guess("0") {}
     
     REGISTER_SERIALIZATION_JSON(BC_Type, Domain_Type, Domain_Border, Dimension, Restriction_opt, Interpolation_opt, Cycle_Type,
-                    Grid_n, f, g, mixed_g, Need_Error, answer, Max_Iteration, Accuracy);
+                    Grid_n, f, g, mixed_g, Need_Error, answer, Max_Iteration, Accuracy, initial_guess);
     
     void _self_checked () {
         if(Cycle_Type != "FMG" && Cycle_Type != "V") throw "Cycle Type not defined.";
@@ -109,6 +113,8 @@ public:
         getDomain();
         // inner domain laplace function
         F.set(f);
+        // initial guess
+        Initial_guess.set(initial_guess);
         // error
         if(Need_Error) Answer.set(answer);
         // BC
@@ -192,39 +198,6 @@ public:
 
 enum Position { lef, rig, up, down };
 
-class Regular_Multigrid_BVPsolver;
-class Irregular_Multigrid_BVPsolver;
-class Multigrid_BVPsolver {
-    Multigrid_BVP_Problem prob;
-public:
-    void readProblem(const std::string file) {
-        Multigrid_BVP_Problem newProb;
-        deserialize_Json(newProb, file);
-        try {
-            newProb._self_checked();
-        } catch (char const * e) {
-            cerr << e << "\n";
-            exit(-1);
-        }
-        prob = newProb;
-    }
-    void printProblem() const {
-        prob.print();
-    }
-    void solveProblem(bool print = 0);
-    void solveProblem(const Multigrid_BVP_Problem &_prob) {
-        prob = _prob;
-        solveProblem();
-    }
-    void solveProblem(std::string File, bool print = 0) {
-        readProblem(File);
-        if(print) printProblem();
-        solveProblem(print); 
-    }
-    NUM norm1, norm2, normi;
-    void Summary();
-};
-
 class Jacobi_Iteration {
     SparseMat<NUM> T, nD;
     Vec<NUM> c;
@@ -250,9 +223,30 @@ public:
     }
 };
 
+template <int dim>
+struct RES {};
+
+template <>
+struct RES<2> {
+    std::vector<std::pair<pair<NUM, NUM>, NUM>> data;
+    void push_back(std::pair<pair<NUM, NUM>, NUM> ele) { data.push_back(ele); }
+};
+template <>
+struct RES<1> {
+    std::vector<std::pair<NUM, NUM>> data;
+    void push_back(std::pair<NUM, NUM> ele) { data.push_back(ele); }
+};
+
+template<int dim>
+class Regular_Multigrid_BVPsolver { };
+
+template<int dim>
+class Irregular_Multigrid_BVPsolver { };
+
 using namespace norm;
 
-class Regular_Multigrid_BVPsolver {
+template <>
+class Regular_Multigrid_BVPsolver<1> {
     const Multigrid_BVP_Problem& prob;
     int n;
     std::vector<Jacobi_Iteration> cal;
@@ -260,117 +254,39 @@ class Regular_Multigrid_BVPsolver {
     Vec<NUM> u, b;
     Vec<NUM> Interpolation(const Vec<NUM>& x, const int N) {
         Vec<NUM> ret;
-        if(prob.Dimension == 1) {
-            ret.resize(N<<1|1);
-            if(prob.Interpolation_opt == "linear") {
-                for(int i = 0; i < ret.size; ++i) {
-                    if(i&1) ret[i] = 0.5*(x[i>>1] + x[(i>>1)+1]);
-                    else ret[i] = x[i>>1];
-                }
-            } else { // prob.Interpolation_opt == "quadratic"
-                for(int i = 0; i < ret.size; ++i) {
-                    if(i&1) {
-                        int j = i/2;
-                        if(i == 1) ret[i] = (3*x[j]+6*x[j+1]-x[j+2])/8.0;
-                        else if(i == (N<<1)-1) ret[i] = (3*x[j+1]+6*x[j]-x[j-1])/8.0;
-                        else ret[i] = (-x[j-1]+9*x[j]+9*x[j+1]-x[j+2])/16.0;
-                    }
-                    else ret[i] = x[i>>1];
-                }
+        
+        ret.resize(N<<1|1);
+        if(prob.Interpolation_opt == "linear") {
+            for(int i = 0; i < ret.size; ++i) {
+                if(i&1) ret[i] = 0.5*(x[i>>1] + x[(i>>1)+1]);
+                else ret[i] = x[i>>1];
             }
-        } else {
-            int N2 = N<<1;
-            ret.resize((N2+1)*(N2+1));
-            auto ID = [](int i, int j, int N) -> int { 
-                return j * (N+1) + i; 
-            }; // for 2d function
-            if(prob.Interpolation_opt == "linear") {
-                for(int i = 0; i <= N2; ++i)
-                for(int j = 0; j <= N2; ++j) {
-                    int I = i>>1, J = j>>1;
-                    if((i&1) && (j&1)) ret[ID(i, j, N2)] = 0.25 * (
-                        x[ID(I, J, N)] + x[ID(I+1, J, N)] + x[ID(I+1, J+1, N)] + x[ID(I, J+1, N)]);
-                    else if(i&1) ret[ID(i, j, N2)] = 0.5 * (x[ID(I, J, N)] + x[ID(I+1, J, N)]);
-                    else if(j&1) ret[ID(i, j, N2)] = 0.5 * (x[ID(I, J, N)] + x[ID(I, J+1, N)]);
-                    else ret[ID(i, j, N2)] = x[ID(I, J, N)];
+        } else { // prob.Interpolation_opt == "quadratic"
+            for(int i = 0; i < ret.size; ++i) {
+                if(i&1) {
+                    int j = i/2;
+                    if(i == 1) ret[i] = (3*x[j]+6*x[j+1]-x[j+2])/8.0;
+                    else if(i == (N<<1)-1) ret[i] = (3*x[j+1]+6*x[j]-x[j-1])/8.0;
+                    else ret[i] = (-x[j-1]+9*x[j]+9*x[j+1]-x[j+2])/16.0;
                 }
-            } else { // prob.Interpolation_opt == "quadratic"
-                for(int i = 0; i <= N2; ++i)
-                for(int j = 0; j <= N2; ++j) {
-                    if((~i&1)&&(~j&1)) ret[ID(i, j, N2)] = x[ID(i>>1, j>>1, N)];
-                    else if(~i&1) {
-                        int I = i>>1, J = j>>1;
-                        if(j == 1) ret[ID(i, j, N2)] = (3*x[ID(I, J, N)]+6*x[ID(I, J+1, N)]-x[ID(I, J+2, N)])/8.0;
-                        else if(j == N2-1) ret[ID(i, j, N2)] = (3*x[ID(I, J+1, N)]+6*x[ID(I, J, N)]-x[ID(I, J-1, N)])/8.0;
-                        else ret[ID(i, j, N2)] = (-x[ID(I, J-1, N)]+9*x[ID(I, J, N)]+9*x[ID(I, J+1, N)]-x[ID(I, J+2, N)])/16.0;
-                    } else if(~j&1) {
-                        int I = i>>1, J = j>>1;
-                        if(i == 1) ret[ID(i, j, N2)] = (3*x[ID(I, J, N)]+6*x[ID(I+1, J, N)]-x[ID(I+2, J, N)])/8.0;
-                        else if(i == N2-1) ret[ID(i, j, N2)] = (3*x[ID(I+1, J, N)]+6*x[ID(I, J, N)]-x[ID(I-1, J, N)])/8.0;
-                        else ret[ID(i, j, N2)] = (-x[ID(I-1, J, N)]+9*x[ID(I, J, N)]+9*x[ID(I+1, J, N)]-x[ID(I+2, J, N)])/16.0;
-                    } else {
-                        int I = i>>1, J = j>>1, cnt = 0, id = ID(i, j, N2);
-                        if(J + 2 <= N) { cnt += 8;
-                            ret[id] += (4*x[ID(I,J+1,N)]+4*x[ID(I+1,J,N)]+2*x[ID(I+1,J+1,N)]-x[ID(I,J+2,N)]-x[ID(I+1,J+2,N)]);
-                        }
-                        if(I - 1 >= 0) { cnt += 8;
-                            ret[id] += (4*x[ID(I,J,N)]+4*x[ID(I+1,J+1,N)]+2*x[ID(I,J+1,N)]-x[ID(I-1,J,N)]-x[ID(I-1,J+1,N)]);
-                        }
-                        if(J - 1 >= 0) { cnt += 8;
-                            ret[id] += (4*x[ID(I,J+1,N)]+4*x[ID(I+1,J,N)]+2*x[ID(I,J,N)]-x[ID(I,J-1,N)]-x[ID(I+1,J-1,N)]);
-                        }
-                        if(I + 2 <= N) { cnt += 8;
-                            ret[id] += (4*x[ID(I,J,N)]+4*x[ID(I+1,J+1,N)]+2*x[ID(I+1,J,N)]-x[ID(I+2,J,N)]-x[ID(I+2,J+1,N)]);
-                        }
-                        ret[id] /= (NUM)cnt;
-                    }
-                }
+                else ret[i] = x[i>>1];
             }
         }
+
         return ret;
     }
     Vec<NUM> Restriction(const Vec<NUM>& x, const int N) {
         Vec<NUM> ret;
-        if(prob.Dimension == 1) {
-            ret.resize((N>>1)+1);
-            if(prob.Restriction_opt == "injection") {
-                for(int i = 0; i < ret.size; ++i) {
-                    ret[i] = x[i<<1];
-                }
-            } else { // prob.Restriction_opt == "full_weight"
-                ret[0] = x[0]; ret[N>>1] = x[N];
-                for(int i = 1; i < ret.size-1; ++i) {
-                    ret[i] = 0.25*(x[(i<<1)-1]+2*x[i<<1]+x[i<<1|1]);
-                }
+
+        ret.resize((N>>1)+1);
+        if(prob.Restriction_opt == "injection") {
+            for(int i = 0; i < ret.size; ++i) {
+                ret[i] = x[i<<1];
             }
-        } else {
-            auto ID = [](int i, int j, int N) -> int { 
-                return j * (N+1) + i; 
-            }; // for 2d function
-            int N2 = N>>1;
-            ret.resize((N2+1)*(N2+1));
-            if(prob.Restriction_opt == "injection") {
-                for(int j = 0; j <= N2; ++j) 
-                for(int i = 0; i <= N2; ++i) 
-                    ret[ID(i, j, N2)] = x[ID(i<<1, j<<1, N)];
-            } else { // prob.Restriction_opt == "full_weight"
-                for(int j = 0; j <= N2; ++j) 
-                for(int i = 0; i <= N2; ++i) {
-                    if((i == 0 || i == N2) && (j == 0 || j == N2)) {
-                        ret[ID(i, j, N2)] = x[ID(i<<1, j<<1, N)];
-                    } else if(i == 0 || i == N2) {
-                        ret[ID(i, j, N2)] = 0.25 * (2*x[ID(i<<1,j<<1,N)]+x[ID(i<<1,(j<<1)-1,N)]+x[ID(i<<1,j<<1|1,N)]);
-                    } else if(j == 0 || j == N2) {
-                        ret[ID(i, j, N2)] = 0.25 * (2*x[ID(i<<1,j<<1,N)]+x[ID((i<<1)-1,j<<1,N)]+x[ID(i<<1|1,j<<1,N)]);
-                    } else {
-                        int I = i<<1, J = j<<1;
-                        ret[ID(i, j, N2)] = (
-                            x[ID(I-1,J-1,N)] + 2*x[ID(I,J-1,N)] + x[ID(I+1,J-1,N)]
-                           +2*x[ID(I-1,J,N)] + 4*x[ID(I,J  ,N)] + 2*x[ID(I+1,J,N)]
-                           +x[ID(I-1,J+1,N)] + 2*x[ID(I,J+1,N)] + x[ID(I+1,J+1,N)]
-                        )/16.0;
-                    }
-                }
+        } else { // prob.Restriction_opt == "full_weight"
+            ret[0] = x[0]; ret[N>>1] = x[N];
+            for(int i = 1; i < ret.size-1; ++i) {
+                ret[i] = 0.25*(x[(i<<1)-1]+2*x[i<<1]+x[i<<1|1]);
             }
         }
         return ret;
@@ -400,8 +316,11 @@ public:
     Regular_Multigrid_BVPsolver(Multigrid_BVP_Problem& _) : prob(_) {}
     void solve() {
         n = prob.Grid_n; int len = (n+1)*(prob.Dimension==2?n+1:1);
-        if(prob.Dimension == 1) sol1();
-        if(prob.Dimension == 2) sol2();
+        sol1();
+
+        for(int i = 0; i <= n; ++i) u[i] = prob.Initial_guess(prob.xl + prob.h * i);
+        b = b - cal[0].A * u;
+
         for(int iter = 0; iter < prob.Max_Iteration; ++iter) {
             Vec<NUM> v(len);
             if(prob.Cycle_Type == "V") {
@@ -445,6 +364,166 @@ public:
         b[n] = prob.G[rig](r);
         for(int i = 1; i < n; ++i) b[i] = prob.F(l + i * h);
     }
+ 
+    void get_results(RES<1>& results) const {
+        results.data.clear();
+        if(prob.Dimension == 1) {
+            for(int i = 0; i <= prob.Grid_n; ++i)
+                results.push_back({prob.xl + i * prob.h, u[i]});
+        }
+    }
+
+    tuple<NUM,NUM,NUM,NUM> ErrorAnalysis(bool show) {
+        Vec<NUM> err;
+        err.resize(u.size);
+        for(int i = 0; i <= prob.Grid_n; ++i) {
+            err[i] = fabs(prob.Answer(prob.xl + i * prob.h) - u[i]);
+        }
+        if(prob.BC_Type == "Neumann") {
+            NUM av = avg(err);
+            for(auto & x : err) x -= av;
+        }
+        return {Norm1Vec(err), Norm2Vec(err), NormiVec(err), NormiVec(b)};
+    }
+};
+
+template <>
+class Regular_Multigrid_BVPsolver<2> {
+    const Multigrid_BVP_Problem& prob;
+    int n;
+    std::vector<Jacobi_Iteration> cal;
+    map<int,int> calid;
+    Vec<NUM> u, b;
+    Vec<NUM> Interpolation(const Vec<NUM>& x, const int N) {
+        Vec<NUM> ret;
+        int N2 = N<<1;
+        ret.resize((N2+1)*(N2+1));
+        auto ID = [](int i, int j, int N) -> int { 
+            return j * (N+1) + i; 
+        }; // for 2d function
+        if(prob.Interpolation_opt == "linear") {
+            for(int i = 0; i <= N2; ++i)
+            for(int j = 0; j <= N2; ++j) {
+                int I = i>>1, J = j>>1;
+                if((i&1) && (j&1)) ret[ID(i, j, N2)] = 0.25 * (
+                    x[ID(I, J, N)] + x[ID(I+1, J, N)] + x[ID(I+1, J+1, N)] + x[ID(I, J+1, N)]);
+                else if(i&1) ret[ID(i, j, N2)] = 0.5 * (x[ID(I, J, N)] + x[ID(I+1, J, N)]);
+                else if(j&1) ret[ID(i, j, N2)] = 0.5 * (x[ID(I, J, N)] + x[ID(I, J+1, N)]);
+                else ret[ID(i, j, N2)] = x[ID(I, J, N)];
+            }
+        } else { // prob.Interpolation_opt == "quadratic"
+            for(int i = 0; i <= N2; ++i)
+            for(int j = 0; j <= N2; ++j) {
+                if((~i&1)&&(~j&1)) ret[ID(i, j, N2)] = x[ID(i>>1, j>>1, N)];
+                else if(~i&1) {
+                    int I = i>>1, J = j>>1;
+                    if(j == 1) ret[ID(i, j, N2)] = (3*x[ID(I, J, N)]+6*x[ID(I, J+1, N)]-x[ID(I, J+2, N)])/8.0;
+                    else if(j == N2-1) ret[ID(i, j, N2)] = (3*x[ID(I, J+1, N)]+6*x[ID(I, J, N)]-x[ID(I, J-1, N)])/8.0;
+                    else ret[ID(i, j, N2)] = (-x[ID(I, J-1, N)]+9*x[ID(I, J, N)]+9*x[ID(I, J+1, N)]-x[ID(I, J+2, N)])/16.0;
+                } else if(~j&1) {
+                    int I = i>>1, J = j>>1;
+                    if(i == 1) ret[ID(i, j, N2)] = (3*x[ID(I, J, N)]+6*x[ID(I+1, J, N)]-x[ID(I+2, J, N)])/8.0;
+                    else if(i == N2-1) ret[ID(i, j, N2)] = (3*x[ID(I+1, J, N)]+6*x[ID(I, J, N)]-x[ID(I-1, J, N)])/8.0;
+                    else ret[ID(i, j, N2)] = (-x[ID(I-1, J, N)]+9*x[ID(I, J, N)]+9*x[ID(I+1, J, N)]-x[ID(I+2, J, N)])/16.0;
+                } else {
+                    int I = i>>1, J = j>>1, cnt = 0, id = ID(i, j, N2);
+                    if(J + 2 <= N) { cnt += 8;
+                        ret[id] += (4*x[ID(I,J+1,N)]+4*x[ID(I+1,J,N)]+2*x[ID(I+1,J+1,N)]-x[ID(I,J+2,N)]-x[ID(I+1,J+2,N)]);
+                    }
+                    if(I - 1 >= 0) { cnt += 8;
+                        ret[id] += (4*x[ID(I,J,N)]+4*x[ID(I+1,J+1,N)]+2*x[ID(I,J+1,N)]-x[ID(I-1,J,N)]-x[ID(I-1,J+1,N)]);
+                    }
+                    if(J - 1 >= 0) { cnt += 8;
+                        ret[id] += (4*x[ID(I,J+1,N)]+4*x[ID(I+1,J,N)]+2*x[ID(I,J,N)]-x[ID(I,J-1,N)]-x[ID(I+1,J-1,N)]);
+                    }
+                    if(I + 2 <= N) { cnt += 8;
+                        ret[id] += (4*x[ID(I,J,N)]+4*x[ID(I+1,J+1,N)]+2*x[ID(I+1,J,N)]-x[ID(I+2,J,N)]-x[ID(I+2,J+1,N)]);
+                    }
+                    ret[id] /= (NUM)cnt;
+                }
+            }
+        }
+
+        return ret;
+    }
+    Vec<NUM> Restriction(const Vec<NUM>& x, const int N) {
+        Vec<NUM> ret;
+        
+        auto ID = [](int i, int j, int N) -> int { 
+            return j * (N+1) + i; 
+        }; // for 2d function
+        int N2 = N>>1;
+        ret.resize((N2+1)*(N2+1));
+        if(prob.Restriction_opt == "injection") {
+            for(int j = 0; j <= N2; ++j) 
+            for(int i = 0; i <= N2; ++i) 
+                ret[ID(i, j, N2)] = x[ID(i<<1, j<<1, N)];
+        } else { // prob.Restriction_opt == "full_weight"
+            for(int j = 0; j <= N2; ++j) 
+            for(int i = 0; i <= N2; ++i) {
+                if((i == 0 || i == N2) && (j == 0 || j == N2)) {
+                    ret[ID(i, j, N2)] = x[ID(i<<1, j<<1, N)];
+                } else if(i == 0 || i == N2) {
+                    ret[ID(i, j, N2)] = 0.25 * (2*x[ID(i<<1,j<<1,N)]+x[ID(i<<1,(j<<1)-1,N)]+x[ID(i<<1,j<<1|1,N)]);
+                } else if(j == 0 || j == N2) {
+                    ret[ID(i, j, N2)] = 0.25 * (2*x[ID(i<<1,j<<1,N)]+x[ID((i<<1)-1,j<<1,N)]+x[ID(i<<1|1,j<<1,N)]);
+                } else {
+                    int I = i<<1, J = j<<1;
+                    ret[ID(i, j, N2)] = (
+                        x[ID(I-1,J-1,N)] + 2*x[ID(I,J-1,N)] + x[ID(I+1,J-1,N)]
+                       +2*x[ID(I-1,J,N)] + 4*x[ID(I,J  ,N)] + 2*x[ID(I+1,J,N)]
+                       +x[ID(I-1,J+1,N)] + 2*x[ID(I,J+1,N)] + x[ID(I+1,J+1,N)]
+                    )/16.0;
+                }
+            }
+        }
+        return ret;
+    }
+    void VC(Vec<NUM> &vh, const Vec<NUM> &fh, const int nu1, const int nu2, const int N) {
+        int id = calid[N];
+        cal[id].GoIter(vh, fh, nu1);
+        if(N > 2) {
+            Vec<NUM> f2h = Restriction((fh - cal[id].A * vh), N);
+            Vec<NUM> v2h(prob.Dimension==1?N/2+1:(N/2+1)*(N/2+1));
+            VC(v2h, f2h, nu1, nu2, N/2);
+            vh = vh + Interpolation(v2h, N/2);
+        }
+        cal[id].GoIter(vh, fh, nu2);
+    }
+    void FMG(Vec<NUM> &vh, const Vec<NUM> &fh, const int nu1, const int nu2, const int N) {
+        int id = calid[N];
+        if(N > 2) {
+            Vec<NUM> f2h = Restriction(fh, N);
+            Vec<NUM> v2h(prob.Dimension==1?N/2+1:(N/2+1)*(N/2+1));
+            FMG(v2h, f2h, nu1, nu2, N/2);
+            vh = Interpolation(v2h, N/2);
+        }
+        VC(vh, fh, nu1, nu2, N);
+    }
+public:
+    Regular_Multigrid_BVPsolver(Multigrid_BVP_Problem& _) : prob(_) {}
+    void solve() {
+        n = prob.Grid_n; int len = (n+1)*(prob.Dimension==2?n+1:1);
+        sol2();
+
+        for(int i = 0; i <= n; ++i) for(int j = 0; j <= n; ++j)
+            u[i * (n + 1) + j] = prob.Initial_guess(prob.xl + prob.h * i, prob.yl + prob.h * j);
+
+        b = b - cal[0].A * u;
+
+        for(int iter = 0; iter < prob.Max_Iteration; ++iter) {
+            Vec<NUM> v(len);
+            if(prob.Cycle_Type == "V") {
+                VC(v, b, 5, 5, n);
+            } else {
+                FMG(v, b, 5, 5, n);
+            }
+            u = u + v;
+            b = b - cal[0].A * v;
+            if(Norm2Vec(v) < prob.Accuracy) break;
+        }
+    }
+    
     void sol2() {
         bool isd[4];
         for(int i = 0; i < 4; ++i) isd[i] = prob._bc_types[i] == "Dirichlet";
@@ -512,53 +591,118 @@ public:
         b[ID(0, n, n)] = prob.G[cho[2].first](xl, yr);
         b[ID(n, n, n)] = prob.G[cho[3].first](xr, yr);
     }
-    tuple<NUM,NUM,NUM> ErrorAnalysis(bool show) {
-        Vec<NUM> err;
-        if(prob.Dimension == 1) {
-            err.resize(u.size);
+    void get_results(RES<2>& results) const {
+        results.data.clear();
+        int ido = 0;
+        for(int j = 0; j <= prob.Grid_n; ++j) 
             for(int i = 0; i <= prob.Grid_n; ++i) {
-                err[i] = fabs(prob.Answer(prob.xl + i * prob.h) - u[i]);
+                results.push_back({{prob.xl+i*prob.h, prob.yl+j*prob.h}, u[ido++]});
             }
-        } else if(prob.Dimension == 2) {
-            err.resize(u.size - 4);
-            int id = 0, ido = 0;
-            for(int j = 0; j <= prob.Grid_n; ++j) 
-                for(int i = 0; i <= prob.Grid_n; ++i) {
-                    if((i == 0 || i == prob.Grid_n) && (j == 0 || j == prob.Grid_n)) { ido++; continue;}
-                    err[id++] = fabs(prob.Answer(prob.xl+i*prob.h, prob.yl+j*prob.h) - u[ido++]);
-                }
-        }
+    }
+    tuple<NUM,NUM,NUM,NUM> ErrorAnalysis(bool show) {
+        Vec<NUM> err;
+
+        err.resize(u.size - 4);
+        int id = 0, ido = 0;
+        for(int j = 0; j <= prob.Grid_n; ++j) 
+            for(int i = 0; i <= prob.Grid_n; ++i) {
+                if((i == 0 || i == prob.Grid_n) && (j == 0 || j == prob.Grid_n)) { ido++; continue;}
+                err[id++] = fabs(prob.Answer(prob.xl+i*prob.h, prob.yl+j*prob.h) - u[ido++]);
+            }
+
         if(prob.BC_Type == "Neumann") {
             NUM av = avg(err);
             for(auto & x : err) x -= av;
         }
-        return {Norm1Vec(err), Norm2Vec(err), NormiVec(err)};
+        return {Norm1Vec(err), Norm2Vec(err), NormiVec(err), NormiVec(b)};
     }
 };
 
-void Multigrid_BVPsolver::solveProblem(bool show) {
-    if(this->prob.Domain_Type == "Regular") {
-        Regular_Multigrid_BVPsolver solver(this->prob);
-        solver.solve();
-        if(this->prob.Need_Error == 1) {
-            auto [_norm1, _norm2, _normi] = solver.ErrorAnalysis(show);
-            this->norm1 = _norm1;
-            this->norm2 = _norm2;
-            this->normi = _normi;
-            if(show) this->Summary();
+class Multigrid_BVPsolver {
+    Multigrid_BVP_Problem prob;
+    RES<1> results1;
+    RES<2> results2;
+public:
+    void readProblem(const std::string file) {
+        Multigrid_BVP_Problem newProb;
+        deserialize_Json(newProb, file);
+        try {
+            newProb._self_checked();
+        } catch (char const * e) {
+            cerr << e << "\n";
+            exit(-1);
         }
-    } else {
-        // not implement yet.
+        prob = newProb;
     }
-}
-
-void Multigrid_BVPsolver::Summary() { // call after solveProblem!
-    if(this->prob.Need_Error == 1) {
-        std::cerr << "Error norm-1   : " << fixed << setprecision(10) << this->norm1 << std::endl;
-        std::cerr << "Error norm-2   : " << fixed << setprecision(10) << this->norm2 << std::endl;
-        std::cerr << "Error norm-inf : " << fixed << setprecision(10) << this->normi << std::endl;
-        std::cerr.unsetf(ios::floatfield);
+    void printProblem() const {
+        prob.print();
     }
-}
+    void solveProblem(bool print = 0)  {
+        if(this->prob.Domain_Type == "Regular") {
+            if(this->prob.Dimension == 1) {
+                Regular_Multigrid_BVPsolver<1> solver(this->prob);
+                solver.solve();
+                if(this->prob.Need_Error == 1) {
+                    auto [_norm1, _norm2, _normi, _residual] = solver.ErrorAnalysis(print);
+                    this->norm1 = _norm1;
+                    this->norm2 = _norm2;
+                    this->normi = _normi;
+                    this->residual = _residual;
+                    this->Summary();
+                }
+                solver.get_results(this->results1);
+            } else {
+                Regular_Multigrid_BVPsolver<2> solver(this->prob);
+                solver.solve();
+                if(this->prob.Need_Error == 1) {
+                    auto [_norm1, _norm2, _normi, _residual] = solver.ErrorAnalysis(print);
+                    this->norm1 = _norm1;
+                    this->norm2 = _norm2;
+                    this->normi = _normi;
+                    this->residual = _residual;
+                    this->Summary();
+                }
+                solver.get_results(this->results2);
+            }
+        } else {
+            // not implement yet.
+        }
+    }
+    void solveProblem(const Multigrid_BVP_Problem &_prob) {
+        prob = _prob;
+        solveProblem();
+    }
+    void solveProblem(std::string File, bool print = 0) {
+        readProblem(File);
+        if(print) printProblem();
+        solveProblem(print); 
+    }
+    void saveResults(std::string file = "res.csv") const {
+        ofstream OUT(file);
+        if(!OUT.is_open()) {
+            throw "[Error] open file " + file;
+            return;
+        }
+        if(this->prob.Dimension == 1)
+        for(auto [x, y]: results1.data) {
+            OUT << x << "," << y << std::endl;
+        }
+        else
+        for(auto [x, y]: results2.data) {
+            OUT << x.first << "," << x.second << "," << y << std::endl;
+        }
+        OUT.close();
+    }
+    NUM norm1, norm2, normi, residual;
+    void Summary() {
+            if(this->prob.Need_Error == 1) {
+            std::cerr << "Error norm-1   : " << fixed << setprecision(10) << this->norm1 << std::endl;
+            std::cerr << "Error norm-2   : " << fixed << setprecision(10) << this->norm2 << std::endl;
+            std::cerr << "Error norm-inf : " << fixed << setprecision(10) << this->normi << std::endl;
+            std::cerr << "Residual       : " << fixed << setprecision(10) << this->residual << std::endl;
+            std::cerr.unsetf(ios::floatfield);
+        }
+    }
+};
 
 #endif
