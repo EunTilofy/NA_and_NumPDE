@@ -1,5 +1,5 @@
 /**********************************************************************
- * Ver 3.0 updated on Jan. 27th, 2024, by EunTilofy
+ * Ver 3.1 updated on May. 28th, 2024, by EunTilofy
  * In this version, 
  * 1, change the two class function2d and functionVec to one class
  * 2, use funcion as the origin class, and make specializatino to
@@ -131,7 +131,7 @@ public:
     }
     Poly_n &operator += (const Poly_n& o) {
         if (n < o.n) resize(o.n);
-        for(int i = 0; i < n; ++i) coef[i] += o.coef[i];
+        for(int i = 0; i < min(n,o.n); ++i) coef[i] += o.coef[i];
         return *this;
     }
     Poly_n operator - (const Poly_n& o) const {
@@ -145,7 +145,7 @@ public:
     }
     Poly_n &operator -= (const Poly_n& o) {
         if(n < o.n) resize(o.n);
-        for(int i = 0; i < n; ++i) coef[i] -= o.coef[i];
+        for(int i = 0; i < min(n,o.n); ++i) coef[i] -= o.coef[i];
         return *this;
     }
     Poly_n operator * (const Type& o) const {

@@ -1,0 +1,214 @@
+\documentclass[lang=cn,a4paper,newtx,bibend=bibtex]{elegantpaper}
+\usepackage{env}
+\title{Problems of Appendix-D}
+\author{张志心 \ 计科2106}
+\date{\zhdate{2024/05/28}}
+\pgfplotsset{compat=1.17}
+\addbibresource[location=local]{reference.bib}
+\begin{document}
+\maketitle
+
+\begin{prob}[D.5]
+  Let ${\cal X}$ be the set of all bounded and unbounded sequences
+  of complex numbers. Show that the function $d$ given by
+  \begin{equation*}
+    \forall x=(\xi_j),\ \forall y=(\eta_j),\ \ 
+    d(x,y) = \sum_{j=1}^{\infty} \frac{1}{2^j}
+    \frac{|\xi_j-\eta_j|}{1+|\xi_j-\eta_j|}
+  \end{equation*}
+  is a metric on ${\cal X}$.
+\end{prob}
+
+\begin{proof}~~\\根据 Def D.3：
+\begin{enumerate}
+\item 非负性：\(\forall x=(\xi_j),\ \forall y=(\eta_j),\ \ 
+    d(x,y) = \sum_{j=1}^{\infty} \frac{1}{2^j}
+    \frac{|\xi_j-\eta_j|}{1+|\xi_j-\eta_j|}\geq 0\);
+    \item 不可分与同一性：若 \(x = y\)，即 \(\sum_{j=1}^{\infty} \frac{1}{2^j}\frac{|\xi_j - \eta_j|}{1+|\xi_j - \eta_j} = 0\)，反之，若  \(\sum_{j=1}^{\infty} \frac{1}{2^j}\frac{|\xi_j - \eta_j|}{1+|\xi_j - \eta_j} = 0\)，因为 \(\forall j, \frac{1}{2^j}\frac{|\xi_j - \eta_j|}{1+|\xi_j - \eta_j} \geq 0\)，所以 \(\forall j, \frac{1}{2^j}\frac{|\xi_j - \eta_j|}{1+|\xi_j - \eta_j} = 0\Rightarrow \forall j, \xi_j = \eta_j \Rightarrow x = y\) ；
+    \item  对称性：\(\forall x=(\xi_j),\ \forall y=(\eta_j),\ \ 
+    d(x,y) = \sum_{j=1}^{\infty} \frac{1}{2^j}
+    \frac{|\xi_j-\eta_j|}{1+|\xi_j-\eta_j|} = \sum_{j=1}^{\infty} \frac{1}{2^j}
+    \frac{|\eta_j-\xi_j|}{1+|\eta_j-\xi_j|} = d(y,x)\)；
+    \item 三角不等式：因为 $f(t) = \frac{t}{1+t}$ 单调递增，所以由 $|a+b| \leq |a|+|b|$ 可以得到 $f(|a+b|) \leq f(|a|+|b|)$。所以有
+\[\frac{|a+b|}{1+|a+b|} \leq \frac{|a|+|b|}{1+|a|+|b|}\leq \frac{|a|}{1+|a|+|b|} + \frac{|b|}{1+|a|+|b|} \leq \frac{|a|}{1+|a|} + \frac{|b|}{1+|b|},\]
+对于 $\forall x = (x_i)_j, y=(\eta_j), z=(\zeta_j)$，取 $a = \xi_j - \eta_j, b = \eta_j - \zeta_j$，有
+\[d(x,z) = \sum_{j=1}^{\infty} \frac{1}{2^j} \frac{|\xi_j - \zeta_j|}{1+|\xi_j - \zeta_j|}\leq \sum_{j=1}^{\infty} \frac{1}{2^j} \left[\frac{|\xi_j - \eta_j|}{1+|\xi_j-\eta_j|} + \frac{|\eta_j - \zeta_j|}{1+|\eta_j-\zeta_j|}\right] = d(x, y) + d(y, z).\]
+\end{enumerate}
+根据 (1,2,3,4) 可以得到 $d$ 是 $\mathcal{X}$ 上对度量。
+\end{proof}
+
+\begin{prob}[D.16]
+  The completeness depends on the metric.
+  For the metric 
+  $d_1(x,y)=\int_a^b|x(t)-y(t)|\,\dif t$,
+  show that the metric space $({\cal C}[a,b],d_1)$
+  is not complete.
+\end{prob}
+
+\begin{proof}
+    取
+    \begin{equation*}
+        f_n(t) = 
+        \begin{aligned}
+            \left\{
+                \begin{array}{ll}
+                    -1, & a\leq t\leq \dfrac{a+b}2 - \dfrac{b-a}{2n}, \\
+                    \dfrac{2n}{b-a}\left(t - \dfrac{a+b}2\right), & \dfrac{a+b}2 - \dfrac{b-a}{2n} < t < \dfrac{a+b}2 + \dfrac{b-a}{2n}, \\
+                    1. & \dfrac{a+b}2 + \dfrac{b-a}{2n} \\
+                \end{array}
+            \right.
+        \end{aligned}
+    \end{equation*}
+    对任意 $m>n$，有 $d_1(f_n, f_m) = \dfrac{b-a}2(\dfrac 1n - \dfrac 1m) \rightarrow 0 ~(m,n\rightarrow \infty$，因此 $\{f_n\}$ 是 $({\cal C}[a,b],d_1)$ 上的 Cauchy 列。
+    假设 $\{f_n\}$ 收敛于 $f\in \cal C$，则任意 $a<c<b$，有
+    \begin{equation*}
+        \lim_{n\rightarrow \infty} \int_a^b |f_n(x) - f(x)| \dd x
+        = \lim_{n\rightarrow \infty} \int_a^c |f_n(x) - f(x)| \dd x
+        + \lim_{n\rightarrow \infty} \int_c^b |f_n(x) - f(x)| \dd x
+        = 0.
+    \end{equation*}
+    即
+    \begin{equation*}
+        \lim_{n\rightarrow \infty} \int_a^c |f_n(x) - f(x)| \dd x
+        = \lim_{n\rightarrow \infty} \int_c^b |f_n(x) - f(x)| \dd x
+        = 0.
+    \end{equation*}
+    因为对任意的 $a<c<\frac {a+b}2$，都存在 $N\in \mathbb{N}^+$ 使得 $\forall n>N, \forall a<x<c, f_n(x) = -1$，所以 $\{f_n\}$ 在 $[a,c]$ 上收敛于常值 $-1$。由 $c$ 的任意性可得 $\{f_n\}$ 在 $[a,\frac{a+b}2)$ 上收敛于 $-1$。同理可知 $\{f_n\}$ 在 $(\frac {a+b}2,b]$ 上收敛于 $1$。即 $f$ 在 $[a,\frac{a+b}2)$ 取值为 $-1$，在 $(\frac {a+b}2,b]$ 上取值为 $1$。无论 $f$ 在 $\frac {a+b}2$ 上如何取值都不可能连续，因此 $\{f_n\}$ 在 $\cal C$ 上不收敛。即 $(\cal C, d_1)$ 不完备。
+\end{proof}
+
+\begin{prob}[D.40]
+  Show that the $\ell^p$ space in Definition D.39
+  is complete for $p\ge 1$.
+\end{prob}
+
+\begin{proof}
+设 $(x_n)$ 是 $(\ell^p, d)$ 上的 Cauchy 列 \(x_n = (\xi_{n,j})_{j\geq 1}\)，即
+\[\lim_{n,m\to \infty} d(x_n, d_m) = \lim_{n, m\to \infty} \left(\sum_{j=1}^{\infty} |\xi_{n, j} - \xi_{m, j}|^p\right)^{\frac1{p}} = 0,\]
+所以，$\forall \epsilon > 0, \exists N, \forall m, n > N$，有 $d(x_n, d_m) < \epsilon$，即 $|\xi_{n, j} - \xi_{m, j}| < d(x_n, d_m) < \epsilon$，所以 $\forall j, (\xi_{\cdot, j})$ 是 $\mathbb{C}$ 上的 Cauchy 列，所以 $\exists \xi_j \in \mathbb{C}$ 满足 $\xi_j = \lim_{n\to \infty} \xi_{n, j}$。令 $x = (\xi_j)_{j\geq 1}$。对于每一个固定的 $i$ 和上述 $m,n$，有 $\sum_{j=1}^i |\xi_{n, j} - \xi_{m,j}|^p < \epsilon^p$，令 $m\to \infty$，有 $\sum_{j=1}^i |\xi_{n, j} - \xi_j|^p \leq \epsilon^p$，再令 $i\to \infty$，有 $\sum_{j=1}^{\infty} |\xi_{n,j} - \xi_j|^p \leq \epsilon^p$，所以 $x_n - x \in \ell^p$。因此 $\lim_{n\to\infty} x_n = x$ ，根据三角不等式
+\[
+\left(\sum_{j=1}^{\infty} |\xi_j|^p\right)^{\frac1{p}} = d(x_n - x, x) \leq d(x_n, 0) + d(x_n - x, 0) < \infty.
+\]
+所以 $x\in \ell^p$，因此 $(\ell^p, d), p\geq 1$ 是完备的。
+\end{proof}
+
+\begin{prob}[D.42]
+  Show that the sequence space $c_{00}$
+  in Notation 24
+  is a dense subset of $\ell^p$
+  in Definition D.39 with $p\in[1,\infty)$.
+\end{prob}
+
+\begin{proof}
+$\forall (a_n)_{n\geq 1}\in \ell^p$，有 $\sum_{n\geq 1} |a_n|^p < \infty$，所以 $\forall \epsilon > 0, \exists N \in \mathbb{N}\quad \text{s.t.}\quad \sum_{n\geq N} |a_n|^p < \epsilon^p$，构造 $(b_n) \in c_{00}$ 为 $b_n = \Cases{a_n, n< N\\ 0, \text{Others}}$。所以 $d((a_n), (b_n)) = \left(\sum_{n\geq N} |a_n|^p\right)^{\frac1{p}} < \epsilon$，根据 Def D.17，$c_{00}$ 是 $\ell^p$ 的稠密子集。
+\end{proof}
+
+\begin{prob}[D.49]
+  Show that $\emptyset$ and ${\cal X}$
+  are both open and closed.
+\end{prob}
+
+\begin{proof}
+因为 $\mathcal{X} = \mathcal{X} \fxg \emptyset, \emptyset = \mathcal{X} \fxg \mathcal{X}$，所以只需要证明 $\emptyset, \mathcal{X}$  都是开集。因为 $\forall x \in \mathcal{X}, x\notin \emptyset$，所以 $\emptyset$ 为开集（虚真命题）；因为 $\forall x \in \mathcal{X}, \forall r > 0, B_r(x) \in \mathcal{X}$，所以 $\mathcal{X}$ 是开集。
+\end{proof}
+
+\begin{prob}[D.52]
+  If a closed set $F$ in a metric space ${\cal X}$
+  does not contain any open set,
+  then ${\cal X}\setminus F$ is dense in ${\cal X}$.
+\end{prob}
+
+\begin{proof}
+反证法，若 $\mathcal{X}\setminus F$ 在 $\mathcal{X}$ 中不稠密，那么 $\exists x \in \mathcal{X}, \epsilon > 0, B_r(x) \cap \mathcal{X} \setminus F = \emptyset$，所以 $B_r(x) \subset F$，所以 $\emptyset \neq E:= \{y : d(x, y) < \frac{r}2\} \subset F$ 是一个开集（因为 $\forall y \in E, \exists r_1 = \frac{\frac{r}2 - d(x, y)}2 > 0, \forall z \in B_{r_1}(y), d(x,z) \leq d(x, y) + d(y, z) \leq r_1 + d(x, y) < \frac{r}2, \Rightarrow z \in E, \Rightarrow B_{r_1} \subset E $），与 $F$ 中不包含任何开集矛盾。\\所以 $\mathcal{X} \setminus F$ 在 $\mathcal{X}$ 中稠密。
+\end{proof}
+
+\begin{prob}[D.112]
+  What is the connection between the logical statements in (D.27) and (D.30)?
+\end{prob}
+
+\begin{solution}
+    (D.30) 是 (D.27) 的充分不必要条件。
+\\
+    假设 (D.30) 成立，对任意的 $\epsilon > 0$，取 $\delta = \dfrac{\epsilon}L$，则
+    \begin{equation*}
+        \forall x,y\in \mathcal{X}, d_{\mathcal{X}}(x,y)<\delta \Rightarrow d_{\mathcal{Y}}(x,y)<L\delta = \epsilon.
+    \end{equation*}
+    因此 (D.27) 成立。
+\\
+    反之，若 (D.27) 成立，取 $f(x) = \sqrt x, \mathcal{X} = [0,1], \mathcal{Y} = [0,1]$。
+    对任意 $\epsilon > 0$，取 $\delta = \epsilon^2$，则
+    \begin{equation*}
+        \forall x,y\in [0,1], |x-y|<\epsilon^2 \Rightarrow |\sqrt x - \sqrt y| = \left|\dfrac{x-y}{\sqrt x + \sqrt y}\right| < \dfrac{\epsilon^2}{\epsilon} = \epsilon.
+    \end{equation*}
+    因此 (D.27) 成立。但因为 $f(x)$ 的导数无界，所以 (D.30) 不成立。
+\end{solution}
+
+\begin{prob}[D.137]
+  Show that the \emph{Hilbert cube}
+  in the metric space $\ell^2$, % $(\ell^2, \|\cdot\|_2)$, 
+  \begin{equation*}
+    C := \left\{
+      (x_n)_{n\in \mathbb{N}^+}:\ x_n\in \left[0,\frac{1}{n}\right]
+      \right\}, 
+  \end{equation*}
+  is sequentially compact.
+\end{prob}
+
+\begin{proof}
+    $C$ 显然是闭集。因此根据 Lem D.136，只需证明 $C$ 完全有界。
+\\
+    对任意 $\epsilon>0$，存在 $n\in \mathbb{N}^+$ 使得 $\sum_{k=n+1}^{\infty}\dfrac 1{k^2} < \dfrac{\epsilon^2}2$。令
+    \begin{equation*}
+        N_\epsilon = \left\{(x_1, x_2, \dots, x_n, 0, 0, \dots)~:~ \forall k = 1, \dots, n, x_k = \dfrac{j_k\epsilon}{\sqrt{2n}}, j_k = 0, 1, \dots, \left\lfloor \dfrac{\sqrt{2n}}{k\epsilon}\right\rfloor\right\},       
+    \end{equation*}
+    则对任意 $y = (y_n)_{n\in \mathbb{N^+}}$，存在 $x\in N_\epsilon$，使得
+    \begin{equation*}
+        d(x,y)^2 = \sum_{k=1}^\infty (x_k-y_k)^2 = \sum_{k=1}^n (x_k-y_k)^2 + \sum_{k=n+1}^{\infty} y_k^2 < \sum_{k=1}^n \left(\dfrac{\epsilon}{\sqrt{2n}}\right)^2 + \sum_{k=n+1}^{\infty} \left(\dfrac 1k\right)^2 < \dfrac{\epsilon^2}2 + \dfrac{\epsilon^2}2 = \epsilon^2.
+    \end{equation*}
+    故 $C$ 完全有界。
+    因此 $C$ 列紧。
+\end{proof}
+
+\begin{prob}[D.159]
+  Denote by $\Omega\subset \mathbb{R}^n$ a bounded open convex set.
+  For $M_1,M_2\in\mathbb{R}^+$,
+  show that the set
+  \begin{equation*}
+    {\cal F} := \left\{f\in {\cal C}^{(1)}(\overline{\Omega}) :
+      \forall x\in \Omega,\ |f(x)|\le M_1;\, 
+      \|\nabla f(x)\|\le M_2
+    \right\}
+  \end{equation*}
+  is sequentially compact.
+\end{prob}
+
+\begin{proof}~~\\
+    \textbf{一致有界性}：因为 $\forall f\in \mathcal{F}, \forall x\in \Omega, |f(x)|\leq M_1$，所以 $\mathcal{F}$ 是一致有界的。\\
+    \textbf{等度连续性}：对任意 $f\in \mathcal{F}, x, y \in \Omega$，因为 $\Omega$ 是凸集，所以 线段 $[x,y]\subset \Omega$。
+    令 $\phi(t) = f((1-t)x + ty)$，则 $\phi(0) = f(x), \phi(1) = f(y), \phi'(t) = (y-x)^T\nabla f((1-t)x + ty)$。根据微分中值定理有
+    \begin{equation*}
+        |f(y)-f(x)| = |\phi(1)-\phi(0)| = |\phi'(\xi)| = |(y-x)^T\nabla f((1-\xi)x + \xi y| \leq |y-x||\nabla f((1-\xi)x + \xi y| \leq M_2|y-x|.
+    \end{equation*}
+    因此 $f\in \mathcal{F}$ Lipschitz 连续且有一致的 Lipschitz 常数 $M_2$。对任意 $\epsilon>o$，取 $\delta = \dfrac{\epsilon}{M_2}$，则对任意 $f\in \mathcal{F}, x,y\in \Omega, |x-y|<\delta$，有 $|f(x)-f(y)|<M_2\delta=\epsilon$。
+\\
+    由 Ascoli-Arzela 定理（Theorem D.158），$\mathcal{F}$ 是列紧函数空间。
+\end{proof}
+
+\begin{prob}[D.172]
+  If the radius of convergence of $f$ in
+  Example D.171
+  is $+\infty$,
+  does $(T_n)_{n\in\mathbb{N}^+}$ converge to $f$
+  uniformly or locally uniformly?
+\end{prob}
+
+\begin{solution}
+    局部一致收敛。由 Example D.170，对任意 $r>0$，$\{T_n(x)\}$ 在闭区间 $[a-r,a+r]$ 上局部一致收敛于 $f(x)$。下面举反例证明 $\{T_n(x)\}$ 在 $\mathbb{R}$ 上不一致收敛于 $f$。\\
+    考虑 $f(x) = e^x, a = 0$。因为 $f(x)$ 在 $\mathbb{R}$ 上解析，所以其泰勒级数 $T_n(x) = \sum_{k=0}^n \dfrac{x^n}{n!}$ 的收敛半径为 $+\infty$。\\
+    取 $\epsilon=1$，对任意的 $n\in \mathbb{N}^+$，取 $x=n+1$，则
+    \begin{equation*}
+        |T_n(x)-f(x)| = |\sum_{k=0}^n \dfrac{x^k}{k!} - e^x| = \sum_{k=n+1}^n \dfrac{(n+1)^k}{k!} > \dfrac{(n+1)^{n+1}}{(n+1)!} > 1.
+    \end{equation*}
+    所以 $\{T_n(x)\}$ 在 $\mathbb{R}$ 上不一致收敛于 $f(x)$。
+\end{solution}
+
+\end{document}

@@ -1,0 +1,746 @@
+\documentclass[lang=cn,a4paper,newtx,bibend=bibtex]{elegantpaper}
+\usepackage{env}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+
+\title{\emph{《初值问题求解器》}项目文档}
+\author{张志心~~3210106357~~计科2106}
+\date{May. 29. 2024}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{设计文档}
+
+\subsection{测试方法}
+
+\begin{verbatim}
+    make all       # 编译该项目代码。
+    make run       # 编译并运行该项目代码，求解目录 data/ 下的样例，并保存结果于同目录
+                   # 同时，画图辅助文件将保存于 res/ 目录下。
+    make plot      # 编译，运行，绘制所有样例的图示。
+    make testspeed # 不同算法 CPU 用时比较（具体见 3.5 节）
+\end{verbatim}
+
+你可以使用 \texttt{make story} 生成本项目文档。
+
+\subsection{初值问题定义}
+\begin{lstlisting}[language=C++]
+using Func = function<valarray<db>(const valarray<db> &, db)>;
+using Utype = valarray<db>;
+\end{lstlisting}
+对于初值问题 $u'(t)=f(u, t)$，我们使用 \lstinline{Func} 来表示初值问题中的 $f$ 函数的类型，使用 \lstinline{Utype} 来表示 $u,U$ 的类型。
+
+\subsection{初值问题答案类\lstinline{IVPsolution}}
+我们使用 \lstinline{IVPsolution} 来存放一个初值问题的答案，该类中将保存每步 $U^{(n)}$ 的估计值，使用 \lstinline{operator()(double x)} 来获得特点上的值，使用线性插值的方法。使用 \lstinline{type} 来表示该答案中每步的步长是否不同（自适应RK方法）。具体定义如下：
+\begin{lstlisting}[language=C++]
+class IVPsolution
+{
+    vector<Utype> U;
+    vector<db> t;
+    db L, R, N, k;
+    int type;
+public:
+    IVPsolution(const vector<Utype>& U, const db& l, const db& r, int type = 0, const vector<db> t=vector<db>(0)):
+        U(U), L(l), R(r), N(U.size()-1), k((r-l)/N), type(type), t(t) {}
+    Utype operator() (db x) const
+    {
+        if(type)
+        {
+            int i = clamp<int>(upper_bound(t.begin(), t.end(), x) - t.begin() - 1, 0, N-1);
+            return U[i] + (x-t[i])/(t[i+1]-t[i]) * (U[i+1]-U[i]);
+        }
+        int i = clamp<int>(floor((x-L)/k), 0, N-1);
+        return U[i] + (x-L-i*k)/k * (U[i+1]-U[i]);
+    }
+    int size() const { return N+1; }
+    db getlen(int i, int j) const { if(type) return (t[j]-t[i]); return (j-i)*k; }
+    db gett(int i) const { if(type) return t[i]; return L+i*k; }
+    Utype operator [] (const int& k) const { return U[k]; }
+    Utype& operator [] (const int& k) { return U[k]; }
+};
+\end{lstlisting}
+
+\subsection{初值问题求解器类\lstinline{IVPsolver}}
+初值问题求解器基类为 \lstinline{IVPsolver}。相关类继承关系如下：
+\begin{verbatim}
+    IVPsolver
+        +--> LMMsolver
+        |       +--> Adams_Bashforth
+        |       +--> Adams_Moulton
+        |       +--> BDF
+        +--> RKsolver
+                +--> Non_embedded_RK
+                |       +--> classical_RK
+                |       +--> ESDIRK
+                |       +--> Gauss_Legendre_RK
+                +--> Embedded_RK
+                        +--> Fehlberg_embedded_RK
+                        +--> Dormand_Prince_embedded_RK
+\end{verbatim}
+\lstinline{IVPsolver} 的相关定义如下：
+\begin{lstlisting}[language=C++]
+class IVPsolver
+{
+public:
+    virtual IVPsolution solve(const Func& f, const Utype& ul, db L, db R, int N) const = 0;
+    virtual ~IVPsolver() = default;
+};
+\end{lstlisting}
+其中，\lstinline{IVPsolver::solve} 是所有其继承类都需要实现的纯虚函数，它的功能是求解初值问题：$u'(t) = f(u, t), u(L)=u_l$，通过 $N$ 步得到 $u([L,R])$ 的估计。 该函数为初值问题求解器的核心函数。
+
+\subsubsection{LMM求解器}
+
+\begin{lstlisting}[language=C++]
+class LMMsolver : public IVPsolver
+{
+protected:
+    vector<db> alpha, beta;
+public:
+    LMMsolver() {}
+    Utype Im_iter(const Func& f, vector<Utype>& U, int n, int s, db k, db tn) const ;
+    Utype Ex_iter(const Func& f, vector<Utype>& U, int n, int s, db k, db tn) const ;
+};
+\end{lstlisting}
+
+LMM 方法即 $U^{(n+s)} + \sum_{j=0}^{s-1} \alpha_j \UB^{(n+j)} = k \sum_{j=0}^s \beta_j f(\UB^{(n+j)}, t_{n+j})$，该类中保存 \texttt{alpha, beta} 的相关值，根据迭代类型的不同，分为隐式与显式，其迭代方法于 \lstinline{Im_iter, Ex_iter} 中实现。
+
+\lstinline{Adams_Bashforth, Adams_Moulton, BDF} 为 \lstinline{LMMsolver} 的子类，其构造函数均补充了 \texttt{alpha, beta} 数列的具体值，并且根据迭代方式的不同，在各自的 \texttt{solve} 函数中使用不同的迭代函数来求解初值问题。
+
+\subsubsection{RK求解器}
+在RK求解器基类中，只定义了系数矩阵 $a$，和系数向量 $b, c$。
+\begin{lstlisting}[language=C++]
+class RKsolver : public IVPsolver
+{
+protected:
+    vector<valarray<db>> a;
+    valarray<db> b, c;
+public:
+    RKsolver(const vector<valarray<db>> &a, const valarray<db>& b, 
+    const valarray<db>& c) : a(a), b(b), c(c) {}
+};
+\end{lstlisting}
+
+对于非自适应RK方法，经典RK方法在求解过程为显式，而 ESDIRK 和高斯勒让德方法都为隐式，并且为了求解效率，两者在求解过程中使用的迭代方法也不相同。基于此，在非显示RK方法求解器基类，我们作如下定义：
+\begin{lstlisting}[language=C++]
+class Non_embedded_RK : public RKsolver
+{
+public:
+    Non_embedded_RK(const vector<valarray<db>> &a, const valarray<db>& b, 
+    const valarray<db>& c) : RKsolver(a, b, c) {}
+    virtual Utype get_next(const Func& f, const Utype& U, const db k, const db t) const = 0;
+    Utype Ex_iter(const Func& f, const Utype& U, int s, db k, db tn) const;
+    Utype Im_iter_1(const Func& f, const Utype& U, int s, db k, db tn) const;
+    Utype Im_iter_2(const Func& f, const Utype& U, int s, db k, db tn) const;
+    IVPsolution solve(const Func& f, const Utype& ul, db L, db R, int N) const;
+};
+\end{lstlisting}
+其中，\lstinline{get_next} 纯虚函数为单步推导的辅助函数，在其继承类 \lstinline{classical_RK, ESDIRK, Gauss_Legendre_RK} 中，将明确定义 \lstinline{get_next} 所采用的方法（调用 \lstinline{Ex_iter, Im_iter_1, Im_iter2} 中的某个函数），同时，继承类在构造过程将明确系数 $a, b, c$ 的确切值。
+
+对于自适应RK方法，定义如下：
+\begin{lstlisting}[language=C++]
+class Embedded_RK : public RKsolver
+{
+    using RKsolver::a, RKsolver::b, RKsolver::c;
+    valarray<db> bh;
+    int s, q;
+public:
+    Embedded_RK(int s, int q, const vector<valarray<db>> &a, const valarray<db>& b, 
+    const valarray<db>& c, const valarray<db>& d) : RKsolver(a, b, c), bh(d), s(s), q(q) {}
+    pair<Utype, db> Embedded_iter(const Func& f, const Utype& U, db k, db tn, db tolerance = 1e-6) const;
+    IVPsolution solve(const Func& f, const Utype& ul, db L, db R, int N) const;
+};
+\end{lstlisting}
+其中 \lstinline{Embbeded_iter} 用于返回当前步的估计以及最终采取的 $k$ 值。为了与前面的所有求解器的核心函数保持相同，我们定义 \texttt{tolerance} 的值为 \texttt{N} 的倒数。在其继承类 \lstinline{Fehlberg_embedded_RK, Dormand_Prince_embedded_RK} 中，将明确 $a,b,c,bh$ 的确切值。
+
+\subsection{初值问题求解器工厂 \lstinline{Factory<IVPsolver>}}
+
+我们定义了一个工厂的模板类，具体定义如下：
+\begin{lstlisting}[language=C++]
+template <class T>
+class Factory
+{
+    map<string, shared_ptr<T>> _map;
+	Factory () = default;
+	Factory (const Factory &) = default;
+	Factory& operator = (const Factory &) = default;
+    ~Factory () = default;
+
+public:
+    static Factory &CreateFactory() { static Factory _; return _; }
+    bool insert (const string& id, shared_ptr<T> p) { return _map.insert({id, p}).second; }
+    int count (const string& id) const { return _map.count(id); }
+    bool erase (const string& id)
+    {
+        if (count(id)) { _map.erase(id); return 1; }
+        return 0;
+    }
+    shared_ptr<T> at (const string& id)
+    {
+        if (count(id)) return _map.at(id);
+        throw invalid_argument("id: \""s+id+"\" not exists in this factory."s);
+    }
+    shared_ptr<T>& operator [] (const string& id)
+    {
+        if (count(id)) return _map[id];
+        throw invalid_argument("id: \""s+id+"\" not exists in this factory."s);
+    }
+    auto begin() const -> decltype(_map.begin()) {
+        return _map.begin();
+    }
+    auto begin() -> decltype(_map.begin()) {
+        return _map.begin();
+    }
+    auto end() const -> decltype(_map.end()) {
+        return _map.end();
+    }
+    auto end() -> decltype(_map.end()) {
+        return _map.end();
+    }
+};
+\end{lstlisting}
+
+该工厂支持注册和销毁不同类型的求解器，并通过 \lstinline{std::map<string, shared_ptr<T>>} 来很方便地保管和使用不同名字的求解器指针。在本项目中，我们特化了一个初值问题的求解器类 \lstinline{Factory<IVPsolver> fac}。并且将各种求解器都添加进工厂。
+
+\begin{lstlisting}[language=C++]
+auto& fac = Factory<IVPsolver>::CreateFactory();
+    {
+        for (int p : {1, 2, 3, 4})
+            fac.insert("Adams-Bashforth("s+to_string(p)+")"s, shared_ptr<IVPsolver>((IVPsolver *)(new Adams_Bashforth(p))));
+        for (int p : {2, 3, 4, 5})
+            fac.insert("Adams-Moulton("s+to_string(p)+")"s, shared_ptr<IVPsolver>((IVPsolver *)(new Adams_Moulton(p))));
+        for (int p : {1, 2, 3, 4})
+            fac.insert("BDF("s+to_string(p)+")"s, shared_ptr<IVPsolver>((IVPsolver *)(new BDF(p))));
+        fac.insert("classical-RK"s, shared_ptr<IVPsolver>((IVPsolver *)(new classical_RK())));
+        fac.insert("ESDIRK"s, shared_ptr<IVPsolver>((IVPsolver *)(new ESDIRK)));
+        for (int p : {2, 4, 6})
+            fac.insert("Gauss-Legendre("s+to_string(p)+")"s, shared_ptr<IVPsolver>((IVPsolver *)(new Gauss_Legendre_RK(p/2))));
+        fac.insert("Fehlberg"s, shared_ptr<IVPsolver>((IVPsolver *)(new Fehlberg_embedded_RK)));
+        fac.insert("Dormand-Prince"s, shared_ptr<IVPsolver>((IVPsolver *)(new Dormand_Prince_embedded_RK)));
+    }
+\end{lstlisting}
+
+因此，当我们要使用名字为 \texttt{name} 的求解器时，只需要
+\begin{lstlisting}[language=C++]
+    fac[name]->solve(f, u0, L, R, N);
+\end{lstlisting}
+
+\newpage
+\section{数值方法说明}
+
+设方程为$\uB'(t) = \fB(\uB, t), \uB: \RBB\rightarrow \RBB^d, \fB: \RBB^d\times \RBB\rightarrow \RBB^d$，令初值为$\UB^0=\uB(t_0)=\uB(0)$，终止时间为$T$，时间步数为$N$。在固定步长的方法中，步长$k=\frac TN$。$\UB^n \approx \uB(t_n) = \uB(t_0+nk)$。
+
+输入为 $\uB(0), T, N$，输出为 $\UB^n, n=0,1,\dots,N$。
+
+\subsection{线性多步法}
+
+\subsubsection{显式多步法：Adam-Bashforth格式}
+
+Adam-Bashforth格式的公式为：
+
+\begin{equation*}
+    \UB^{n+s} = \UB^{n+s-1} + k\sum_{j=0}^{s-1} \beta_j\fB(\UB^{n+j}, t_{n+j}), n = 0, 1, \dots, N-s. 
+\end{equation*}
+
+其中
+\begin{itemize}
+    \item $s=1$ 时，$\beta_0 = 1$；
+    \item $s=2$ 时，$\beta_0 = -\frac 12, \beta_1 = \frac 32$；
+    \item $s=3$ 时，$\beta_0 = \frac{5}{12}, \beta_1 = -\frac 43, \beta_2 = \frac{23}{12}$；
+    \item $s=4$ 时，$\beta_0 = -\frac 38, \beta_1 = \frac{37}{24}, \beta_2 = -\frac{59}{24}, \beta_3 = \frac{55}{24}$。
+\end{itemize}
+
+该公式是显式的，可以直接通过 $\UB^n, \UB^{n+1},\dots, \UB^{n+s-1}$ 的值计算出 $\UB^{n+s}$。因此在求出前 $s-1$ 个初值 $\UB^1, \dots, \UB^{s-1}$ 后（在第 3 小节会具体介绍如何求出这前 $s-1$ 个初值），直接循环 $N-s$ 次即可求出所有 $\UB^n$。
+
+\subsubsection{隐式多步法：Adam-Moulton格式和Backward differentiation格式}
+
+Adam-Moulton格式的公式为
+\begin{equation*}
+    \UB^{n+s} = \UB^{n+s-1} + k\sum_{j=0}^s \beta_j\fB(\UB^{n+j}, t_{n+j}), n = 0, 1, \dots, N-s.
+\end{equation*}
+
+其中
+\begin{itemize}
+    \item $s=1$ 时，$\beta_0 = \frac 12, \beta_1 = \frac 12$；
+    \item $s=2$ 时，$\beta_0 = -\frac 1{12}, \beta_1 = \frac 23, \beta_2 = -\frac 5{12}$；
+    \item $s=3$ 时，$\beta_0 = \frac{1}{24}, \beta_1 = -\frac {5}{24}, \beta_2 = \frac{19}{24}, \beta_3 = \frac 38$；
+    \item $s=4$ 时，$\beta_0 = -\frac {19}{720}, \beta_1 = \frac{53}{360}, \beta_2 = -\frac{11}{30}, \beta_3 = \frac{323}{360}, \beta_4 = \frac{251}{720}$。
+\end{itemize}
+
+Backforward differentiation格式的公式为
+\begin{equation*}
+    \UB^{n+s} = k\beta_s\fB(\UB^{n+s}, t_{n+s}) - \sum_{j=0}^{s-1}\alpha_j\UB^{n+j}.
+\end{equation*}
+
+其中
+\begin{itemize}
+    \item $s=1$ 时，$\alpha_0 = -1, \beta_s = 1$；
+    \item $s=2$ 时，$\alpha_0 = \frac 13, \alpha_1 = -\frac 43, \beta_s = \frac 23$；
+    \item $s=3$ 时，$\alpha_0 = -\frac{2}{11}, \alpha_1 = \frac{9}{11}, \alpha_2 = -\frac{18}{11}, \beta_s = \frac{6}{11}$；
+    \item $s=4$ 时，$\alpha_0 = \frac{3}{25}, \alpha_1 = -\frac{16}{25}, \alpha_2 = \frac{36}{25}, \alpha_3 = -\frac{48}{25}, \beta_s = \frac{12}{25}$。
+\end{itemize}
+
+因为公式中存在 $\fB(\UB^{n+s})$ 项，所以每一步迭代事实上都需要解一个关于 $\UB^{n+1}$ 的\textbf{非线性方程组}。在时间步长 $k$ 足够小时，我们可以合理认为这个非线性方程组的解距离$\UB^n$足够近，可以使用不动点迭代法求解该方程组。具体步骤如下：
+
+设这个方程为 $\XB = \gB(\XB)$，令 $\XB^0 = \UB^n$，计算 $\XB^{l+1} = \gB(\XB^l)$ 直到 $\Vert \XB^{l+1} - \XB^l\Vert_\infty < \epsilon$（这里我们固定 $\epsilon = 10^{-14}$）时，认为 $\{\XB^l\}$ 收敛，令 $\UB^{n+1} = \XB^l$。
+
+当迭代超过 $100$ 步仍未收敛时，认为 $\{\XB^l\}$ 不收敛，此时直接报告多步法不收敛。 
+
+\subsubsection{$s-1$个额外初值的计算}
+
+$s>1$时，线性多步法的第一次迭代需要给出$\UB^1$到$\UB^{s-1}$的条件，因此需要采用单步法计算出$\UB^1,\dots,\UB^{s-1}$的值。因为初值问题的误差是累计的，开始几步的误差对后面的值是有影响的，所以我们不能在相同时间步长下应用低阶单步法，否则会造成掉阶。这里我们直接采用了四阶
+
+假设我们在时间步长$k$下应用$s$阶多步法，如果要用$s-1$阶多步法计算前$s-1$个初值而不掉阶，我们至少需要保证它们具有$O(k^{s+1})$的误差。因此我们要以$k^{\frac{s+1}s}$的步长计算这$s-1$个初值。也就是我们需要进行$(s-1)k^{-\frac 1s}$步迭代。当$s>2$时，$s-1$阶多步法也需要超过一个初值，因此要进一步递归，直到递归到$s=1$为止。
+
+\subsection{Runge-Kutta方法}
+
+Runge-Kutta方法是一类单步法。它的迭代格式为
+\begin{equation*}
+    \begin{aligned}
+        \left\{
+            \begin{aligned}
+                & \yB_i = \fB(\UB^n + k\sum_{j=1}^s a_{i,j}\yB_j, t_n+c_ik), i=1,2,\dots,s,\\
+                & \UB^{n+1} = \UB^n + k\sum_{j=1}^s b_j\yB_j,
+            \end{aligned}
+        \right.
+    \end{aligned}
+\end{equation*}
+
+$\AB=(a_{i,j}), \bB=(b_j), \cB=(c_i)$ 为固定的参数。
+
+\subsubsection{经典四阶Runge-Kutta方法}
+
+经典四阶Runge-Kutta方法的参数为
+
+\begin{equation*}
+    \AB = \MAT{
+        0 & & & \\
+        \frac 12 & 0 & & \\
+        0 & \frac 12 & 0 & \\
+        0 & 0 & 1 & 0 \\
+    },
+    \bB = \MAT{
+        \frac 16 & \frac 13 & \frac 13 & \frac 16 \\
+    },
+    \cB = \MAT{
+        0 \\
+        \frac 12 \\
+        \frac 12 \\
+        1 \\
+    }
+\end{equation*}
+
+它是一个显式方法，所以每一步迭代直接依次根据公式求出 $\yB_1, \yB_2, \yB_3, \yB_4$ 即可。
+
+\subsubsection{六步四阶ESDIRK方法}
+
+六步四阶ESDIRK方法的参数为
+
+\begin{equation*}
+    \AB = \MAT{
+        0 & & & & & \\
+        \frac 14 & \frac 14 & & & & \\
+        \frac {8611}{62500} & \frac{-1743}{31250} & \frac 14 & & & \\
+        \frac {5012029}{34652500} & \frac {-654441}{2922500} & \frac {174375}{388108} & \frac 14 & & \\
+        \frac {15267082809}{155376265600} & \frac{−71443401}{120774400} & \frac{730878875}{902184768} & \frac{2285395}{8070912} & \frac 14 & \\
+        \frac{82889}{524892} & 0 & \frac{15625}{83664} & \frac{69875}{102672} & \frac{−2260}{8211} & \frac 14 \\
+    },
+    \bB = \MAT{
+        \frac{82889}{524892} & 0 & \frac{15625}{83664} & \frac{69875}{102672} & \frac{−2260}{8211} & \frac 14 \\
+    },
+    \cB = \MAT{
+        0 \\
+        \frac 12 \\
+        \frac {83}{250} \\
+        \frac {31}{50} \\
+        \frac {17}{20} \\
+        1 \\
+    }
+\end{equation*}
+
+它是一个隐式方法，但它的RK矩阵是一个上三角矩阵且 $a_{1,1}=0$，因此 $\yB_1 = \fB(\UB^n, t_n)$ 可以显式求出，$\yB_2, \dots, \yB_6$ 可以依次使用初值为 $\yB_1$ 的不动点迭代法求出。而$\UB^{n+1}$可以直接由 $\yB_1$ 到 $\yB_6$ 显式求出。
+
+\subsubsection{高斯勒让德方法}
+
+一步高斯勒让德方法的系数为
+
+\begin{equation*}
+    \AB = \MAT{\frac 12}, \bB = \MAT{1}, \cB = \MAT{\frac 12}.
+\end{equation*}
+
+二步高斯勒让德方法的系数为
+
+\begin{equation*}
+    \AB = \MAT{
+        \frac 14 & \frac{3-2\sqrt 3}{12} \\
+        \frac {3+2\sqrt 3}{12} & \frac 14 \\
+    },
+    \bB = \MAT{ \frac 12 & \frac 12 \\},
+    \cB = \MAT{ \frac {3-\sqrt 3}6 \\\ \frac {3+\sqrt 3}6 \\}
+\end{equation*}
+
+三步高斯勒让德方法的系数为
+
+\begin{equation*}
+    \AB = \MAT{
+        \frac 5{36} & \frac 29 - \frac{\sqrt{15}}{15} & \frac 5{36} - \frac{\sqrt{15}}{30} \\
+        \frac{5}{36} + \frac{\sqrt{15}}{24} & \frac 29 & \frac 5{36} - \frac{\sqrt{15}}{24} \\
+        \frac 5{36} + \frac{\sqrt{15}}{30} & \frac 29 + \frac{\sqrt{15}}{15} & \frac 5{36} \\
+    },
+    \bB = \MAT{\frac 5{18} & \frac 49 & \frac 5{18}},
+    \cB = \MAT{\frac{5-\sqrt{15}}{10} \\ \frac 12 \\ \frac{5+\sqrt{15}}{10} \\}
+\end{equation*}
+
+高斯勒让德方法是隐式方法，且系数矩阵是一般的矩阵。每一步迭代我们只能把 $(\yB_1,\dots,\yB_s)$ 看作一个整体的 $s\times d$ 维的变量解这个不动点问题。选取 $\yB_1 = \dots = \yB_s = \fB(\UB^n, t_n)$ 作为初值进行不动点迭代。
+
+\subsection{自适应步长Runge-Kutta方法}
+
+自适应步长Runge-Kutta方法，就是同时运行两个系数矩阵$\AB$和结点$\cB$相同，但权重（记为$\bB$和$\hat{\bB}$）和收敛阶（记为$p$和$\hat{p}$）不同的Runge-Kutta方法，通过不同阶数方法求解的误差来控制步长，使计算资源能更集中应用在需要精细计算的时间段。
+
+具体地，已知 $\UB^n$ 的条件下，算法按如下步骤求出 $\UB^{n+1}$：
+
+\begin{enumerate}
+    \item 两种方法以 $\UB^n$ 为初值迭代一次，分别得到 $\UB^{n+1}$ 和 $\hat{\UB}^{n+1}$。
+    \item 令 $E_{\mathrm{ind}} = \sqrt{\frac 1d\sum_{i=1}^d(\frac{U_i^{n+1}-\hat{U}_i^{n+1}}{\epsilon_i})^2}$，其中 $\epsilon_i = E_{\mathrm{abs},i}+|U_i^n|E_{\mathrm{rel},i}$。这里取 $E_{\mathrm{abs},i} = E_{\mathrm{rel},i} = \epsilon, \forall i$。
+    \item 令 $k\leftarrow k\min\{\rho_{\max}, \max\{\rho_{\min}, \rho E_{\mathrm{ind}}^{-\frac 1{q+1}}\}\}$，其中 $q = \min\{p, \hat{p}\}, \rho_{\max} = 5, \rho = 0.8, \rho_{\min} = 0.2$。
+    \item 若 $E_{\mathrm{ind}}\leq 1$，则保留当前 $\UB^{n+1}$ 的值并进行下一步迭代，否则重新进行这一步迭代。无论是否重新迭代 $k$ 都更新。
+\end{enumerate}
+
+\subsubsection{Fehlberg 4(5)}
+
+系数如下：
+
+\begin{equation*}
+\begin{aligned}
+    & \AB = \MAT{
+        0 & & & & & \\
+        \frac 14 & 0 & & & & \\
+        \frac 3{32} & \frac 9{32} & 0 & & & \\
+        \frac {1932}{2197} & -\frac {7200}{2197} & \frac{7296}{2197} & 0 & & \\
+        \frac {439}{216} & -8 & \frac {3680}{513} & -\frac {845}{4104} & 0 & \\
+        -\frac {8}{27} & 2 & -\frac {3544}{2565} & \frac{1859}{4104} & -\frac {11}{40} & 0 \\
+    },\\
+    & \bB = \MAT{
+        \frac{25}{216} & 0 & \frac{1408}{2565} & \frac{2197}{4104} & -\frac 15 & 0 \\
+    }\\
+    & \hat{\bB} = \MAT{
+        \frac{16}{135} & 0 & \frac{6656}{12825} & \frac{28561}{56430} & -\frac 9{50} & \frac 2{55} \\
+    }\\
+    & \cB = \MAT{0 & \frac 14 & \frac 38 & \frac {12}{13} & 1 & \frac 12}^T.
+\end{aligned}
+\end{equation*}
+
+这是一个显式方法，不需要不动点迭代。
+
+\subsubsection{Dormand-Prince 5(4)}
+
+系数如下：
+
+\begin{equation*}
+\begin{aligned}
+    & \AB = \MAT{
+        0 & & & & & & \\
+        \frac 15 & 0 & & & & & \\
+        \frac 3{40} & \frac 9{40} & 0 & & & & \\
+        \frac {44}{45} & -\frac{56}{15} & \frac {32}9 & 0 & & & \\
+        \frac {19372}{6561} & -\frac{25360}{2187} & \frac{64448}{6561} & -\frac{212}{729} & 0 & & \\
+        \frac{9017}{3168} & -\frac{355}{33} & \frac{46732}{5247} & \frac{49}{176} & -\frac{5103}{48056} & 0 & \\
+        \frac{35}{384} & 0 & \frac{500}{1113} & \frac{125}{192} & -\frac{2187}{6784} & \frac{11}{84} & 0 \\
+    },\\
+    & \bB = \MAT{
+        \frac{35}{384} & 0 & \frac{500}{1113} & \frac{125}{192} & -\frac{2187}{6784} & \frac{11}{84} & 0 \\
+    },\\
+    & \hat{\bB} = \MAT{
+        \frac{5179}{57600} & 0 & \frac{7571}{16695} & \frac{393}{640} & -\frac{92097}{339200} & \frac{187}{2100} & \frac 1{40} \\
+    },\\
+    & \cB = \MAT{
+        0 & \frac 15 & \frac 3{10} & \frac 45 & \frac 89 & 1 & 1 \\
+    }^T.
+\end{aligned}
+\end{equation*}
+
+这也是一个显式方法，不需要不动点迭代。
+
+\subsection{Richard外插法求误差}
+
+Richard外插法主要用于精确解未知而算法预期收敛阶已知时对数值方法误差的估计。
+
+具体地，它是在初值相同的情况下，用步长为$k$的一步迭代结果与步长为$\frac k2$的两步迭代结果做比较，然后乘 $\frac{2^p}{2^p-1}$ 得到误差的估计值。需要注意的是，这个估计值仅在收敛阶确实为$p$的时候才有意义，否则需要根据实际求出的收敛阶调整$p$。
+
+\newpage
+
+\section{数据测试}
+
+测试初值问题为：
+
+\[
+\Cases{
+\uB_1' = \uB_4\\
+\uB_2' = \uB_5\\
+\uB_3' = \uB_6\\
+\uB_4' = 2\uB_5+\uB_1-\frac{\mu(\uB_1+\mu-1)}{(\uB_2^2+\uB_3^2+(\uB_1+\mu-1)^2)^{3/2}} 
+                    - \frac{(1-\mu)(\uB_1+\mu)}{(\uB_2^2+\uB_3^2+(\uB_1+\mu)^2)^{3/2}} \\
+\uB_5' =-2\uB_4+\uB_2-\frac{\mu\uB_2}{(\uB_2^2+\uB_3^2+(\uB_1+\mu-1)^2)^{3/2}} 
+                    - \frac{(1-\mu)\uB_2}{(\uB_2^2+\uB_3^2+(\uB_1+\mu)^2)^{3/2}} \\
+\uB_6' =-\frac{\mu\uB_3}{(\uB_2^2+\uB_3^2+(\uB_1+\mu-1)^2)^{3/2}} 
+                    - \frac{(1-\mu)\uB_3}{(\uB_2^2+\uB_3^2+(\uB_1+\mu)^2)^{3/2}}
+}
+\]
+以下，算例一为 $\uB(0) = \MAT{0.994 & 0 & 0 & 0 & −2.0015851063790825224 & 0}, T = 17.06521656015796$；\\
+算例二为 $\uB(0) = \MAT{0.879779227778 & 0 & 0 & 0 & -0.379677780949 & 0}, T = 19.140540691377$。
+
+\subsection{线性多步法的测试}
+
+我们对算例1进行测试。取时间步数为 $10^5,2\times 10^5,4\times 10^5,8\times 10^5$。三种方法的误差和效率分别如表1、2、3所示。
+
+\begin{table}\centering
+	\resizebox{0.75\columnwidth}{!}{
+	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+	\hline
+	\multirow{2}{*}{迭代步数} & \multicolumn{3}{c|}{$s=1$} & \multicolumn{3}{c|}{$s=2$} & \multicolumn{3}{c|}{$s=3$} & \multicolumn{3}{c|}{$s=4$} \\ \cline{2-13}
+	& 误差 & 时间 & 收敛阶 & 误差 & 时间 & 收敛阶 & 误差 & 时间 & 收敛阶 & 误差 & 时间 & 收敛阶\\ \cline{1-13}
+	$1\times 10^5$ & 1.73e+00 & 0.015  & - & 2.00e+00 & 0.018 & - & 3.43e-01 & 0.023 & - & 2.17e-01 & 0.024 & - \\ \cline{1-13}
+	$2\times 10^5$ & 1.75e+00 & 0.030 & - & 1.75e+00 & 0.036 & 0.19 & 5.28e-02 & 0.045 & 2.70 & 1.64e-03 & 0.050 & 3.72\\ \cline{1-13}
+	$4\times 10^5$ & 1.75e+00 & 0.062 & - & 1.17e+00 & 0.075 & 0.58 & 7.31e-03 & 0.086 & 2.85 & 1.07e-03 & 0.115 & 3.94\\ \cline{1-13}
+	$8\times 10^5$ & 1.68e+00 & 0.127 & - & 3.17e-01 & 0.153 & 1.88 & 9.64e-04 & 0.187 & 2.92 & 6.77e-05 & 0.212 & 3.98\\ \cline{1-13}
+	\end{tabular}}
+	\caption{Adam-Bashforth方法的误差和效率}
+\end{table}
+
+\begin{table}\centering
+	\resizebox{0.75\columnwidth}{!}{
+	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+	\hline
+	\multirow{2}{*}{迭代步数} & \multicolumn{3}{c|}{$s=2$} & \multicolumn{3}{c|}{$s=3$} & \multicolumn{3}{c|}{$s=4$} & \multicolumn{3}{c|}{$s=5$} \\ \cline{2-13}
+	& 误差 & 时间 & 收敛阶 & 误差 & 时间 & 收敛阶 & 误差 & 时间 & 收敛阶 & 误差 & 时间 & 收敛阶\\ \cline{1-13}
+	$1\times 10^5$ & 1.09e+00 & 0.071 & - & 3.98e-02 & 0.090 & - & 1.95e-02 & 0.115 & - & 7.41e-04 & 0.115 & - \\ \cline{1-13}
+	$2\times 10^5$ & 5.60e-01 & 0.148 & 0.96 & 6.12e-03 & 0.178 & 2.70 & 1.28e-03 & 0.231 & 3.93 & 1.27e-05 & 0.231 & 5.87\\ \cline{1-13}
+	$4\times 10^5$ & 2.07e-01 & 0.315 & 1.44 & 8.34e-04 & 0.329 & 2.88 & 8.16e-05 & 0.435 & 3.97 & 2.13e-07 & 0.435 & 5.90\\ \cline{1-13}
+	$8\times 10^5$ & 5.62e-02 & 0.484 & 1.88 & 1.09e-04 & 0.582 & 2.94 & 5.15e-06 & 0.900 & 3.98 & 4.59e-09 & 0.900 & 5.54\\ \cline{1-13}
+	\end{tabular}}
+	\caption{Adam-Moulton方法的误差和效率}
+\end{table}
+
+\begin{table}\centering
+	\resizebox{0.75\columnwidth}{!}{
+	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+	\hline
+	\multirow{2}{*}{迭代步数} & \multicolumn{3}{c|}{$s=1$} & \multicolumn{3}{c|}{$s=2$} & \multicolumn{3}{c|}{$s=3$} & \multicolumn{3}{c|}{$s=4$} \\ \cline{2-13}
+	& 误差 & 时间 & 收敛阶 & 误差 & 时间 & 收敛阶 & 误差 & 时间 & 收敛阶 & 误差 & 时间 & 收敛阶\\ \cline{1-13}
+	$1\times 10^5$ & 2.08e+00 & 0.090 & - & 1.56e+00 & 0.088 & - & 1.40e-01 & 0.101 & - & 1.43e-01 & 0.117 & - \\ \cline{1-13}
+	$2\times 10^5$ & 2.04e+00 & 0.163 & - & 1.08e+00 & 0.173 & 0.53 & 3.03e-02 & 0.197 & 2.21 & 9.39e-03 & 0.224 & 3.93\\ \cline{1-13}
+	$4\times 10^5$ & 2.04e+00 & 0.276 & - & 5.56e-01 & 0.075 & 0.96 & 4.61e-03 & 0.400 & 2.72 & 6.09e-04 & 0.461 & 3.95\\ \cline{1-13}
+	$8\times 10^5$ & 2.01e+00 & 0.525 & - & 2.05e-01 & 0.153 & 1.44 & 6.26e-04 & 0.684 & 2.88 & 3.88e-05 & 0.770 & 3.97\\ \cline{1-13}
+	\end{tabular}}
+	\caption{BDF方法的误差和效率}
+\end{table}
+
+所有三阶及以上算法都已稳定收敛，一二阶算法误差太大，还没到收敛区域，但也有一定的收敛趋势。
+时间效率上，所有算法都是线性算法，显式明显快于隐式。在达到相同误差时，高阶算法明显更有优势。
+
+\subsection{Runge-Kutta 方法的测试}
+
+所有RK方法的误差和效率如表4所示。
+
+\begin{table}\centering
+	\resizebox{0.75\columnwidth}{!}{
+	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+	\hline
+	\multirow{2}{*}{迭代步数} & \multicolumn{3}{c|}{经典RK} & \multicolumn{3}{c|}{ESDIRK} & \multicolumn{3}{c|}{Gauss,$s=1$} & \multicolumn{3}{c|}{Gauss,$s=2$} & \multicolumn{3}{c|}{Gauss,$s=3$}\\ \cline{2-16}
+	& 误差 & 时间 & 收敛阶 & 误差 & 时间 & 收敛阶 & 误差 & 时间 & 收敛阶 & 误差 & 时间 & 收敛阶 & 误差 & 时间 & 收敛阶\\ \cline{1-16}
+	$1\times 10^4$ & 1.83e+00 & 0.005 & - & 1.55e+00 & 0.063 & - & 1.72e+00 & 0.006 & - & 1.18e+00 & 0.009 & - & 2.77e-02 & 0.013 & - \\ \cline{1-16}
+	$2\times 10^4$ & 4.65e-01 & 0.010 & 1.98 & 1.25e-01 & 0.111 & 3.63 & 2.06e+00 & 0.012 & - & 7.95e-02 & 0.019 & 3.89 & 4.00e-04 & 0.027 & 6.11\\ \cline{1-16}
+	$4\times 10^4$ & 2.29e-02 & 0.019 & 4.34 & 7.47e-03 & 0.231 & 4.06 & 2.02e+00 & 0.021 & - & 4.95e-03 & 0.032 & 4.00 & 6.18e-06 & 0.043 & 6.02 \\ \cline{1-16}
+	$8\times 10^4$ & 1.32e-03 & 0.036 & 4.12 & 4.68e-04 & 0.408 & 4.00 & 5.68e+00 & 0.043 & - & 3.11e-04 & 0.062 & 3.99 & 7.88e-08 & 0.085 & 6.29\\ \cline{1-16}
+	\end{tabular}}
+	\caption{各种RK方法的误差和效率}
+\end{table}
+
+经典四阶RK算法、六步四阶RK算法、两步和三步的Gauss-Legendre算法均已稳定收敛。
+一步Gauss-Legendre算法未到收敛区域。
+
+另外我们可以看到，同样是四阶RK算法，经典四阶RK算法的误差最大，ESDIRK算法次之，Gauss-Legendre算法最小。而时间效率上恰恰相反，经典四阶最快、Gauss-Legendre最慢。这也反映了显式、对角隐式和一般隐式RK算法的一般规律。
+
+下面我们利用外插法对算例2进行测试。如表5所示。注意我们需要用外插法估计得到的事实上是单步误差，因此收敛阶应比算法本身的收敛阶高1。
+
+\begin{table}\centering
+	\resizebox{0.75\columnwidth}{!}{
+	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+	\hline
+	\multirow{2}{*}{迭代步数} & \multicolumn{3}{c|}{经典RK} & \multicolumn{3}{c|}{ESDIRK} & \multicolumn{3}{c|}{Gauss,$s=1$} & \multicolumn{3}{c|}{Gauss,$s=2$} & \multicolumn{3}{c|}{Gauss,$s=3$}\\ \cline{2-16}
+	& 误差 & 外插法误差 & 收敛阶 & 误差 & 外插法误差 & 收敛阶 & 误差 & 外插法误差 & 收敛阶 & 误差 & 外插法误差 & 收敛阶 & 误差 & 外插法误差 & 收敛阶\\ \cline{1-16}
+	$1\times 10^3$ & 1.43e-03 & 2.25e-06 & - & 1.43e-04 & 2.93e-06 & - & 1.48e-01 & 2.54e-03 & - & 1.27e-04 & 2.54e-06 & - & 1.25e-07 & 3.16e-09 & - \\ \cline{1-16}
+	$2\times 10^3$ & 3.90e-05 & 6.95e-08 & 5.02 & 5.29e-06 & 9.20e-08 & 4.99 & 3.43e-02 & 3.23e-04 & 2.98 & 7.95e-06 & 7.78e-08 & 5.04 & 3.86e-09 & 2.44e-11 & 7.02\\ \cline{1-16}
+	$4\times 10^3$ & 8.58e-07 & 2.17e-09 & 5.00 & 2.10e-07 & 2.88e-09 & 5.00 & 8.43e-03 & 4.06e-05 & 2.99 & 4.98e-07 & 2.41e-09 & 5.01 & 1.05e-09 & 7.69e-13 & 4.99 \\ \cline{1-16}
+	$4\times 10^3$ & 1.50e-08 & 6.77e-11 & 5.00 & 9.28e-09 & 9.00e-11 & 5.00 & 2.10e-03 & 5.08e-06 & 3.00 & 3.10e-08 & 7.50e-11 & 5.00 & 3.31e-09 & 1.83e-13 & 2.07 \\ \cline{1-16}
+    \end{tabular}}
+	\caption{各种RK方法的误差和外插法误差}
+\end{table}
+
+经典四阶RK方法、六步四阶ESDIRK方法、一步和两步的Gauss-Legendre算法的外插法误差估计收敛阶都是稳定的。
+三步Gauss-Legendre算法出现了明显掉阶，观察发现它的真实误差也已经明显掉阶了，
+这是因为在误差来到$10^{-9}$这个量级时，误差的主要来源已经不再是算法的格式本身，而是机器精度和不动点迭代。
+
+\subsection{自适应步长 Runge-Kutta 方法的测试}
+
+改变容忍度tolerance，对算例1，计算两种方法的误差、步数和时间：
+
+\begin{table}\centering
+	\resizebox{0.75\columnwidth}{!}{
+	\begin{tabular}{|c|c|c|c|c|c|c|c|}
+	\hline
+	\multicolumn{4}{|c|}{Fehlberg} & \multicolumn{4}{c|}{Dormand-Prince} \\ \cline{1-8}
+	容忍度 & 误差 & 步数 & 时间 & 容忍度 & 误差 & 步数 & 时间 \\ \cline{1-8}
+	1.00e-05 & 1.87e-02 & 1671 & 0.002 & 1.00e-05 & 2.12e+00 & 83 & $<0.001$ \\ \cline{1-8}
+	容忍度 & 误差 & 步数 & 时间 & 容忍度 & 误差 & 步数 & 时间 \\ \cline{1-8}
+	1.00e-06 & 1.77e-03 & 16801 & 0.014 & 1.00e-06 & 1.70e+00 & 349 & $<0.001$ \\ \cline{1-8}
+	容忍度 & 误差 & 步数 & 时间 & 容忍度 & 误差 & 步数 & 时间 \\ \cline{1-8}
+	1.00e-07 & 1.47e-04 & 168054 & 0.141 & 1.00e-07 & 7.71e-03 & 3670 & 0.004 \\ \cline{1-8}
+	容忍度 & 误差 & 步数 & 时间 & 容忍度 & 误差 & 步数 & 时间 \\ \cline{1-8}
+	1.00e-08 & 1.71e-05 & 1680580 & 1.433 & 1.00e-08 & 7.13e-04 & 36763 & 0.035 \\ \cline{1-8}
+	\end{tabular}}
+	\caption{自适应步长RK方法的误差、步数和效率}
+\end{table}
+
+\subsection{算法性能比较}
+我们对于每个算法，我们通过二分 $N$ 的值，找到对于算例1当算法误差无穷范数小于 $1e-3$ 时的步数和 CPU 用时。执行 \texttt{make testspeed}，结果如下（短横线意为算法不收敛或者需要步数超过$2\times 10^6$）：
+
+\begin{longtable}{c|c|c|}
+    算法名称 & 最少步数 & 最少时间 \\ \hline
+    Adams-Bashforth($p=1$) & - & - \\ \hline
+    Adams-Bashforth($p=2$) & - & - \\ \hline
+    Adams-Bashforth($p=3$) & 790037 & 0.224 \\ \hline
+    Adams-Bashforth($p=4$) & 406570 & 0.136 \\ \hline
+    Adams-Moulton($p=2$) & - & - \\ \hline
+    Adams-Moulton($p=3$) & 375857 & 0.450 \\ \hline
+    Adams-Moulton($p=4$) & 212739 & 0.308 \\ \hline
+    Adams-Moulton($p=5$) & 94971 & 0.156 \\ \hline
+    BDF($p=1$) & - & - \\ \hline
+    BDF($p=2$) & - & - \\ \hline
+    BDF($p=3$) & 681183 & 0.844 \\ \hline
+    BDF($p=4$) & 352917 & 0.578 \\ \hline
+    Classical-RK & 85645 & 0.067 \\ \hline
+    ESDIRK & 28946 & 0.626 \\ \hline
+    Gauss-Legendre($p=2$) & - & - \\ hline
+    Gauss-Legendre($p=4$) & 59705 & 0.091 \\ \hline
+    Gauss-Legendre($p=6$) & 17183 & 0.045 \\ \hline
+    Fehlberg & 28946 & 0.044 \\ \hline
+    Dormand-Prince & 24819 & 0.043 \\ \hline
+\end{longtable}
+
+综合比较，Gauss-Legendre算法和两个自适应算法的效率最高。
+
+\subsection{部分求解结果作图式例}
+
+\begin{enumerate}
+    \item Euler方法（Adams-Bashforth $p=1$），$N=24000$:
+        \begin{figure}[H]
+            \centering
+                \includegraphics[width=0.5\textwidth]{../res/IVP10199_Adams-Bashforth(1)_24000.png}
+                \caption{Euler方法，$N=24000$}
+        \end{figure}
+    \item 经典RK方法，$N=6000$:
+        \begin{figure}[H]
+            \centering
+                \includegraphics[width=0.5\textwidth]{../res/IVP10199_classical-RK_6000.png}
+                \caption{经典RK方法，$N=6000$}     
+        \end{figure}
+    \item Dormand-Prince 5(4) 自适应RK方法，100步：
+        \begin{figure}[H]
+            \centering
+                \includegraphics[width=0.5\textwidth]{../res/IVP10199_Fehlberg_45000.png}
+                \caption{Dormand-Prince 5(4)，100步（容忍度取 $45000$）}                
+        \end{figure}
+\end{enumerate}
+
+下面是所有方法求解算例1得到的解。
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.2\textwidth}
+        \includegraphics[width=\textwidth]{../res/IVP10199_Adams-Bashforth(4)_100000.png}
+        \caption{Adams-Bashforth(4)，$N=100000$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.2\textwidth}
+        \includegraphics[width=\textwidth]{../res/IVP10199_Adams-Moulton(5)_100000.png}
+        \caption{Adam-Moulton(5)，$N=100000$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.2\textwidth}
+        \includegraphics[width=\textwidth]{../res/IVP10199_BDF(4)_100000.png}
+        \caption{BDF(4)，$N=100000$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.2\textwidth}
+        \includegraphics[width=\textwidth]{../res/IVP10199_classical-RK_50000.png}
+        \caption{classical-RK，$N=50000$}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.2\textwidth}
+        \includegraphics[width=\textwidth]{../res/IVP10199_ESDIRK_50000.png}
+        \caption{ESDIRK，$N=50000$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.2\textwidth}
+        \includegraphics[width=\textwidth]{../res/IVP10199_Gauss-Legendre(6)_10000.png}
+        \caption{Gauss-Legendre(6)，$N=10000$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.2\textwidth}
+        \includegraphics[width=\textwidth]{../res/IVP10199_Fehlberg_1000000.png}
+        \caption{Fehlberg，$\epsilon=10^{-6}$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.2\textwidth}
+        \includegraphics[width=\textwidth]{../res/IVP10199_Dormand-Prince_1000000.png}
+        \caption{Dormand-Prince，$\epsilon=10^{-6}$}
+    \end{subfigure}
+\end{figure}
+
+下面是所有方法求解算例2得到的解。
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.2\textwidth}
+        \includegraphics[width=\textwidth]{../res/IVP10200_Adams-Bashforth(4)_100000.png}
+        \caption{Adams-Bashforth(4)，$N=100000$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.2\textwidth}
+        \includegraphics[width=\textwidth]{../res/IVP10200_Adams-Moulton(5)_100000.png}
+        \caption{Adam-Moulton(5)，$N=100000$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.2\textwidth}
+        \includegraphics[width=\textwidth]{../res/IVP10200_BDF(4)_100000.png}
+        \caption{BDF(4)，$N=100000$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.2\textwidth}
+        \includegraphics[width=\textwidth]{../res/IVP10200_classical-RK_50000.png}
+        \caption{classical-RK，$N=50000$}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.2\textwidth}
+        \includegraphics[width=\textwidth]{../res/IVP10200_ESDIRK_50000.png}
+        \caption{ESDIRK，$N=50000$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.2\textwidth}
+        \includegraphics[width=\textwidth]{../res/IVP10200_Gauss-Legendre(6)_10000.png}
+        \caption{Gauss-Legendre(6)，$N=10000$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.2\textwidth}
+        \includegraphics[width=\textwidth]{../res/IVP10200_Fehlberg_1000000.png}
+        \caption{Fehlberg，$\epsilon=10^{-6}$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.2\textwidth}
+        \includegraphics[width=\textwidth]{../res/IVP10200_Dormand-Prince_1000000.png}
+        \caption{Dormand-Prince，$\epsilon=10^{-6}$}
+    \end{subfigure}
+\end{figure}
+
+\end{document}

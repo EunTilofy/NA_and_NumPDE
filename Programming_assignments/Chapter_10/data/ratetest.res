@@ -1,0 +1,13 @@
+IVP10199 with Adams-Bashforth(1): N = 100000, err1 = 1.73e+00, err2 = /, Timecost = 0.024
+IVP10200 with Adams-Bashforth(1): N = 100000, err1 = 2.20e-01, err2 = /, Timecost = 0.018
+IVP10199 with Adams-Bashforth(1): N = 200000, err1 = 1.75e+00, err2 = /, Timecost = 0.035
+IVP10200 with Adams-Bashforth(1): N = 200000, err1 = 6.40e-01, err2 = /, Timecost = 0.035
+IVP10199 with Adams-Bashforth(1): N = 400000, err1 = 1.75e+00, err2 = /, Timecost = 0.069
+IVP10200 with Adams-Bashforth(1): N = 400000, err1 = 6.57e-01, err2 = /, Timecost = 0.069
+IVP10199 with Adams-Bashforth(1): N = 800000, err1 = 1.68e+00, err2 = /, Timecost = 0.140
+IVP10200 with Adams-Bashforth(1): N = 800000, err1 = 5.21e-01, err2 = /, Timecost = 0.137
+IVP10199 with Adams-Bashforth(2): N = 100000, err1 = 2.00e+00, err2 = /, Timecost = 0.023
+IVP10200 with Adams-Bashforth(2): N = 100000, err1 = 6.80e-05, err2 = /, Timecost = 0.022
+IVP10199 with Adams-Bashforth(2): N = 200000, err1 = 1.75e+00, err2 = /, Timecost = 0.044
+IVP10200 with Adams-Bashforth(2): N = 200000, err1 = 1.73e-05, err2 = /, Timecost = 0.045
+IVP10199 with Adams-Bashforth(2): N = 400000, err1 = 1.17e+00, err2 = /, Timecost = 0.090

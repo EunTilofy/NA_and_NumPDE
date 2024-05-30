@@ -1,0 +1,11 @@
+Adams-Bashforth(1) 24000
+classical-RK 6000
+Fehlberg 45000
+Adams-Bashforth(4) 100000
+Adams-Moulton(5) 100000
+BDF(4) 100000
+classical-RK 50000
+ESDIRK 50000
+Gauss-Legendre(6) 10000
+Fehlberg 1000000
+Dormand-Prince 1000000

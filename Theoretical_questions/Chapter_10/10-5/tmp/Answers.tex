@@ -1,0 +1,291 @@
+\documentclass[lang=cn,a4paper,newtx,bibend=bibtex]{elegantpaper}
+\usepackage{env}
+\title{Problems of Chapter 10.6.5-10.6.10}
+\author{张志心 \ 计科2106}
+\date{\zhdate{2024/05/14}}
+\pgfplotsset{compat=1.17}
+\addbibresource[location=local]{reference.bib}
+\begin{document}
+\maketitle
+
+\begin{prob}[Exercise 10.196]
+  Prove Lemma 10.195 for the scalar case.
+\end{prob}
+
+\begin{solution}
+  考虑方程 $u' = f(u, t)$。记 $u(t_n) = u_n = u, f(u(t_n), t_n) = f$，
+  \begin{equation*}
+    \begin{aligned}
+      u(t_{n+1}) & = u(t_n + k) = u + ku' + \frac{k^2}2 u'' + \frac{k^3}6 u''' + \frac {k^4}{24} u'''' + O(k^5) & \\
+      & = u + kf + \frac{k^2}2(f_t + f_uf) + 
+      \frac{k^3}6(f_u^2f + f_{uu}f^2 + f_uf_t + 2f_{tu}f + f_{tt}) & \\
+      & + \frac{k^4}{24}(5f_{ut}f_uf + 4f_{uu}f_uf^2 + f_u^2f_t + f_u^3f + 3f_{uut}f^2 + f_{uuu}f^3 + 3f_{uu}f_tf + 3f_{ut}f_t + f_uf_{tt} + 3f_{utt}f + f_{ttt}) & \\
+    \end{aligned}
+  \end{equation*}
+  \begin{equation*}
+    \begin{aligned}
+      y_1 & = f(u_n, t_n) = f, & \\
+      y_2 & = f(u_n + \frac k2 y_1, t_n + \frac k2) & \\
+      & = f + \frac k2 ff_u + \frac k2 f_t + \frac {k^2}8f^2f_{uu} + \frac {k^2}4ff_{ut} + \frac {k^2}8f_{tt}
+      + \frac{k^3}{48}f^3f_{uuu} + \frac{k^3}{16}f^2f_{uut} + \frac{k^3}{16}ff_{utt} + \frac{k^3}{48}f_{ttt} + O(k^4), & \\
+    \end{aligned}
+  \end{equation*}
+  \begin{equation*}
+    \begin{aligned}
+      y_3 & = f(u_n + \frac k2 y_2, t_n + \frac k2) & \\
+      & = (f + \frac k2 f_t + \frac {k^2}8 f_{tt} + \frac{k^3}{48} f_{ttt}) & \\
+      & + y_2(\frac k2 f_u + \frac {k^2}4 f_{ut} + \frac {k^3}{16} f_{utt})
+      + y_2^2(\frac {k^2}8 f_{uu} + \frac {k^3}{16} f_{uut})
+      + y_2^3(\frac {k^3}{48} f_{uuu}) + O(k^4) & \\
+      & = (f + \frac k2 f_t + \frac {k^2}8 f_{tt} + \frac{k^3}{48} f_{ttt}) & \\
+      & + (f + \frac k2 ff_u + \frac k2 f_t + \frac {k^2}8f^2f_{uu} + \frac {k^2}4ff_{ut} + \frac {k^2}8f_{tt})
+      (\frac k2 f_u + \frac {k^2}4 f_{ut} + \frac {k^3}{16} f_{utt}) & \\
+      & + (f + \frac k2 ff_u + \frac k2 f_t)^2(\frac {k^2}8 f_{uu} + \frac {k^3}{16} f_{uut}) & \\
+      & + f^3(\frac {k^3}{48} f_{uuu}) + O(k^4) &\\
+      & = f + k(\frac 12 f_t + \frac 12 f_uf) + k^2(\frac 18 f_{tt} + \frac 14 f_u^2f + \frac 14 f_{ut}f + \frac 18 f_{uu}f^2 + \frac 14 f_uf_t) &\\
+      & + k^3(\frac 1{48}f_{ttt} + \frac 1{16} f_{utt} + \frac 14 f_{ut}f_uf + \frac 18 f_{ut}f_t + \frac 3{16}f_{uu}f_uf^2 + \frac 1{16}f_{tt}f_u + \frac 1{16}f_{uut}f^2 + \frac 18 f_{uu}f_t + \frac 1{48}f_{uuu}f^3)
+      + O(k^4) & \\
+    \end{aligned}
+  \end{equation*}
+  \begin{equation*}
+    \begin{aligned}
+      y_4 & = f(u_n + ky_3, t_n + k) & \\
+      & = (f + kf_t + \frac{k^2}2 f_{tt} + \frac{k^3}6 f_{ttt}) & \\
+      & + y_3(kf_u + k^2f_{ut} + \frac{k^3}2f_{utt})
+      + y_3^2(\frac{k^2}2 f_{uu} + \frac{k^3}2 f_{uut})
+      + y_3^3(\frac{k^3}6 f_{uuu}) + O(k^4) & \\
+      & = (f + kf_t + \frac{k^2}2 f_{tt} + \frac{k^3}6 f_{ttt}) & \\
+      & + (f + k(\frac 12 f_t + \frac 12 f_uf) + k^2(\frac 18 f_{tt} + \frac 14 f_u^2f + \frac 14 f_{ut}f + \frac 18 f_{uu}f^2 + \frac 14 f_uf_t))(kf_u + k^2f_{ut} + \frac{k^3}2f_{utt}) & \\
+      & + (f + k(\frac 12 f_t + \frac 12 f_uf))^2(\frac{k^2}2 f_{uu} + \frac{k^3}2 f_{uut}) & \\
+      & + f^3(\frac{k^3}6 f_{uuu}) + O(k^4) & \\
+      & = f + k(f_t + f_uf) + k^2(\frac 12 f_{tt} + f_{ut} + \frac 12 f_uf_t + \frac 12 f_u^2f + f_{uu}f^2) & \\
+      & + k^3(\frac 16 f_{ttt} + \frac 12 f_{ut}f_t + \frac 34 f_{ut}f_uf + \frac 12 f_{utt}f + \frac 18 f_{tt}f_u + \frac 14 f_u^3f
+      + \frac 58 f_{uu}f_uf^2 + \frac 14 f_u^2f_t + \frac 12 f_{uut}f^2 + \frac 12 f_{uu}f_tf + \frac 16 f_{uuu}f^3) + O(k^4) & \\
+    \end{aligned}
+  \end{equation*}
+  \begin{equation*}
+    \begin{aligned}
+      \LM u(t_n) & = u(t_{n+1}) - u(t_n) - k\Phi(u(t_n), t_n; k) & \\
+      & = k(f + \frac k2(f_t + f_uf) + 
+      \frac{k^2}6(f_u^2f + f_{uu}f^2 + f_uf_t + 2f_{tu}f + f_{tt}) & \\
+      & + \frac{k^3}{24}(5f_{ut}f_uf + 4f_{uu}f_uf^2 + f_u^2f_t + f_u^3f + 3f_{uut}f^2 + f_{uuu}f^3 + 3f_{uu}f_tf + 3f_{ut}f_t + f_uf_{tt} + 3f_{utt}f + f_{ttt}) & \\
+      & - \frac 16(y_1 + 2y_2 + 2y_3 + y_4)) & \\
+      & = k \cdot O(k^4) = O(k^5). & \\
+    \end{aligned}
+  \end{equation*}
+\end{solution}
+
+\begin{prob}[Exercise 10.202]
+  Show that the calssical fourth-order RK method has its stability function as
+  \begin{equation*}
+    R(z) = 1 + z + \frac 12 z^2 + \frac 16 z^3 + \frac 1{24}z^4.
+  \end{equation*}
+\end{prob}
+
+\begin{solution}
+  根据 Definition 10.152，我们有
+  \begin{equation*}
+    \begin{aligned}
+        A = \MAT{
+        0 \\
+        \frac 12 & 0 \\
+        0 & \frac 12 & 0 \\
+        0 & 0 & 1 & 0 \\
+      },\\
+      \bB = \MAT{\frac 16 & \frac 13 & \frac 13 & \frac 16}^T, \\
+      \cB = \MAT{0 & \frac 12 & \frac 12 & 1}^T.
+    \end{aligned}
+  \end{equation*}
+  因此
+  \begin{equation*}
+    \begin{aligned}
+      R(z) = & 1 + z\bB^T(I - zA)^{-1}\bm{1} & \\
+      = & 1 + z \MAT{\frac 16 & \frac 13 & \frac 13 & \frac 16}^T
+      \MAT{
+        1 \\
+        -\frac z2 & 1 \\
+        0 & -\frac z2 & 1 \\
+        0 & 0 & -z & 1 \\
+      }^{-1}
+      \MAT{
+        1 \\ 1 \\ 1 \\ 1 \\
+      } & \\
+      = & z \MAT{\frac 16 & \frac 13 & \frac 13 & \frac 16}^T
+      \MAT{
+        1 \\
+        \frac z2 & 1 \\
+        \frac {z^2}4 & \frac z2 & 1 \\
+        \frac {z^3}4 & \frac {z^2}2 & z & 1 \\
+      }
+      \MAT{
+        1 \\ 1 \\ 1 \\ 1 \\
+      } & \\
+      = & 1 + z + \frac {z^2}2 + \frac {z^3}6 + \frac {z^4}{24}.
+    \end{aligned}
+  \end{equation*}
+\end{solution}
+
+\begin{prob}[Exercise 10.206]
+  Define $S_s := \{z: |R_s(z)|\leq 1\}$ where $s = 1,2,3,4$ and $R_s$ is the stability function of the
+  $s-$ stage, $s$th-order ERK method. Show that
+  \begin{equation*}
+    S_1 \subset S_2 \subset S_3.
+  \end{equation*}
+  Does this hold for ERK methods with a higher stage? Why?
+\end{prob}
+
+\begin{solution}
+  要证 $S_1\subset S_2$，即证对任意 $z\in \CBB$，若 $|1+z|\leq 1$，则 $|1+z+\frac {z^2}2|\leq 1$。
+  令 $w=1+z$，则 $|w|\leq 1$，而
+  \begin{equation*}
+    |1+z+\frac {z^2}2| = |w+\frac{(w-1)^2}2| = |\frac {w^2+1}2| \leq \frac {|w|^2+1}2 \leq 1.
+  \end{equation*}
+  因此 $S_1\subset S_2$。
+
+  要证 $S_2\subset S_3$，即证对任意 $z\in \CBB$，若 $|1+z+\frac {z^2}2|\leq 1$，则 $|1+z+\frac {z^2}2+\frac {z^3}6|\leq 1$。
+  令 $w=1+z+\frac{z^2}2$，则 $|w|\leq 1$，$z=\dfrac{-1+\sqrt{2w-1}}2$。
+  \begin{equation*}
+    \begin{aligned}
+      & |1+z+\frac {z^2}2+\frac {z^3}6| & \\
+      = & |w+\dfrac{(-1+\sqrt{2w-1})^3}{48}| & \\
+      = & |\dfrac{21w+1+(w+1)\sqrt{2w-1}}{24}| & \\
+    \end{aligned}
+  \end{equation*}
+  令
+  \begin{equation*}
+    f(\theta) = |21e^{\ii\theta}+1+(e^{\ii\theta}+1)\sqrt{2e^{\ii\theta}-1}|
+  \end{equation*}
+  则
+  \begin{equation*}
+    f'(\theta) = \dfrac{3\ii e^{\ii\theta}(7\sqrt{2e^{\ii\theta}-1}+e^{\ii\theta})
+    (e^{\ii\theta}(21+\sqrt{2e^{\ii\theta}-1})+\sqrt{2e^{\ii\theta}-1})}
+    {\sqrt{2e^{\ii\theta}-1}|21e^{\ii\theta}+1+(e^{\ii\theta}+1)\sqrt{2e^{\ii\theta}-1}}
+  \end{equation*}
+  注意到 $f'(0)=0, f'(\pi)=0, f(0)>f(\pi)$，且 $f$ 是有界函数，因此 $f$ 的极值点也是最值点就是 $f(0)=24$。
+  因此$|1+z+\frac {z^2}2+\frac {z^3}6|\leq 1$，$S_2\subset S_3$。
+
+  对更大的$p$，上述结论不再成立。例如$S_3\subset S_4$的反例有：
+  $z=0.00353523-0.776261\ii,|1+z+\frac{z^2}2+\frac{z^3}6|=0.983133<1,|1+z+\frac{z^2}2+\frac{z^3}6+\frac{z^4}{24}|=1.00419>1$。
+\end{solution}
+
+\begin{prob}[Exercise 10.212]
+  Prove that an A-stable RK method with its stability function
+  as a rational polynomial $R(z) = \frac {P(z)}{Q(z)}$ is L-stable if only if $\mathrm{deg} Q(z) > \mathrm{deg} P(z)$.
+\end{prob}
+
+\begin{solution}
+  设 $P(z) = \sum_{j=0}^m p_jz^j, Q(z) = \sum_{j=0}^n q_jz^j$，则
+  \begin{equation}
+    \exists R>0, ~\mathrm{s.t.}~ 
+    \forall z\geq R, \dfrac 12\leq \dfrac{|p(z)|}{|p_m||z|^m}\leq 2, \dfrac 12\leq \dfrac{|q(z)|}{|q_n||z|^n}\leq 2.
+  \end{equation}
+  根据 Definition 10.139，RK method $L$ 稳定当且仅当 $\lim_{z\rightarrow \infty} |R(z)| = \lim_{z\rightarrow \infty} \frac{|P(z)|}{|Q(z)|} = 0$。
+
+  若 $m<n$，则
+  \begin{equation}
+    \lim_{|z|\rightarrow \infty} \dfrac{|P(z)|}{|Q(z)|} = \lim_{|z|\rightarrow \infty} \dfrac{2|p_m||z|^m}{\frac 12|q_n||z|^n} = 0.
+  \end{equation}
+  若 $m\geq n$，则
+  \begin{equation}
+    \lim_{|z|\rightarrow \infty} \dfrac{|P(z)|}{|Q(z)|} = \lim_{|z|\rightarrow \infty} \dfrac{\frac 12|p_m||z|^m}{2|q_n||z|^n} > 0.
+  \end{equation}
+
+  因此 RK method $L$ 稳定，当且仅当 $m<n$，即 $\mathrm{deg} Q > \mathrm{deg} P$。
+\end{solution}
+
+\begin{prob}[Exercise 10.215]
+  Show that if an A-stable RK method with a nonsingular RK matrix $A$ satisfies
+  \begin{equation*}
+    a_{i,1} = b_1, i = 1,\dots,s,
+  \end{equation*}
+  then it is L-stable.
+\end{prob}
+
+\begin{solution}
+  $a_{i,1} = b_1, i = 1,\dots,s$ 等价于 $A\eB_1 = \bB$。此时，
+  \begin{equation*}
+    \begin{aligned}      
+      & \lim_{|z|\rightarrow \infty} R(z) & \\
+      = & \lim_{|z|\rightarrow \infty} 1+z\bB^T(I-zA)^{-1}\bm{1} & \\
+      = & 1 + \lim_{|z|\rightarrow \infty} \bB^T(\frac 1z - A)^{-1}\bm{1} & \\
+      = & 1 - \bB^T A^{-1}\bm{1} & \\
+      = & 1 - \bB^T A^{-1}\frac{A\eB_1}{b_1} & \\
+      = & 1 - \bB^T \frac{\eB_1}{b_1} & \\
+      = & 1 - \frac{b_1}{b_1} & \\
+      = & 0 &. \\
+    \end{aligned}
+  \end{equation*}
+\end{solution}
+
+\begin{prob}[Exercise 10.220]
+  Show that the collocation method
+  \begin{tabular}{c|ccc}
+    $\frac{4-\sqrt 6}{10}$ & $\frac{88-7\sqrt 6}{360}$ & $\frac{296-169\sqrt 6}{1800}$ & $\frac{-2+3\sqrt 6}{225}$ \\
+    $\frac{4+\sqrt 6}{10}$ & $\frac{296+169\sqrt 6}{1800}$ & $\frac{88+7\sqrt 6}{360}$ & $\frac{-2-3\sqrt 6}{225}$ \\
+    $1$ & $\frac{16-\sqrt 6}{36}$ & $\frac{16+\sqrt 6}{36}$ & $\frac 19$ \\
+    \hline
+    & $\frac{16-\sqrt 6}{36}$ & $\frac{16+\sqrt 6}{36}$ & $\frac 19$ \\
+  \end{tabular}
+  is 5th-order accurate and L-stable.
+\end{prob}
+
+\begin{solution}
+  \begin{equation*}
+    \begin{aligned}
+      q_r(x) = & (x-\frac{4-\sqrt 6}{10})(x+\frac {4+\sqrt 6}{10})(x-1) = x^3 - \frac 95 x^2 + \frac 9{10} x - \frac 1{10}, & \\
+      \int_0^1 q_r(x)\dd x = & (\frac 14 x^4 - \frac 35 x^3 + \frac 9{20} x^2 - \frac 1{10} x)\bigg|_0^1 = 0, & \\
+      \int_0^1 xq_r(x)\dd x = & (\frac 15 x^5 - \frac 9{20} x^4 + \frac 3{10} x^3 - \frac 1{20} x^2)\bigg|_0^1 = 0, & \\
+      \int_0^1 x^2q_r(x)\dd x = & (\frac 16 x^6 - \frac 9{25} x^5 + \frac 9{40} x^4 - \frac 1{30} x^3)\bigg|_0^1 = -\frac 1{600} & \\
+    \end{aligned}
+  \end{equation*}
+  所以 $r=2$。由 Theorem 10.183 得组合方法的精度为 $3+2=5$。
+  因为 $\det(A) = \frac 1{60} \neq 0$，所以 $A$ 非奇异。且因为 $a_{s,j} = b_j, j=1,2,3$，所以组合方法是刚性稳定的。
+\end{solution}
+
+\begin{prob}[Exercise 10.229]
+  Rewrite the implicit midpoint method
+  \begin{equation*}
+    \UB^{n+1} = \UB^n + k\fB(\dfrac{\UB^n + \UB^{n+1}}2, t_n + \dfrac k2)
+  \end{equation*}
+  in the standard form and derive its Butcher tableau.
+  Show that it is B-stable.
+\end{prob}
+
+\begin{solution}
+  令 $\yB_1 = \fB(\dfrac{\UB^n + \UB^{n+1}}2, t_n + \dfrac k2)$。
+  将 $\UB^{n+1}$ 的公式代入自身，可得
+  \begin{equation*}
+    \begin{aligned}      
+      \UB^{n+1} = & \UB^n + k\fB(\dfrac{\UB^n + \UB^{n+1}}2, t_n + \dfrac k2) & \\
+      = & \UB^n + k\fB(\dfrac{\UB^n + \UB^n + k\fB(\frac{\UB^n + \UB^{n+1}}2, t_n + \frac k2)}2, t_n + \dfrac k2) & \\
+      = & \UB^n + k\fB(\UB^n + \dfrac k2\fB(\dfrac{\UB^n + \UB^{n+1}}2, t_n + \dfrac k2), t_n + \dfrac k2) & \\
+      = & \UB^n + k\fB(\UB^n + \dfrac k2\yB_1, t_n + \dfrac k2). & \\
+    \end{aligned}
+  \end{equation*}
+  因此 $\yB_1 = \fB(\UB^n + \dfrac k2\yB_1, t_n + \dfrac k2)$。
+  标准形式为
+  \begin{equation*}
+      \left\{
+        \begin{aligned}
+          \yB_1 = & \fB(\UB^n + \dfrac k2 \yB_1) & \\
+          \UB^{n+1} = & \UB^n + k\yB_1 & \\
+        \end{aligned}
+      \right.
+  \end{equation*}
+  下面证明 B-稳定性。设初值问题 $\uB' = \fB(\uB, t)$ 是压缩的，且 $\UB^n, \VB^n$ 为两个数值解，记 $\eB^n = \UB^n - \VB^n$，则
+  \begin{equation*}
+    \begin{aligned}
+      & \langle \dfrac{\eB^n + \eB^{n+1}}2, \eB^{n+1}\rangle \\
+      = & \langle \dfrac{\eB^n + \eB^{n+1}}2, \eB^n + k(\fB(\dfrac{\UB^n + \UB^{n+1}}2, t_n + \dfrac k2) - \fB(\dfrac{\VB^n + \VB^{n+1}}2, t_n + \dfrac k2))\rangle & \\
+    \end{aligned}
+  \end{equation*}
+  因为 $\fB$ 收缩，而 $\dfrac{\eB^n+\eB^{n+1}}2 = \dfrac{\UB^n + \UB^{n+1}}2 - \dfrac{\VB^n + \VB^{n+1}}2$，
+  所以根据 Definition 10.224 有 $\langle \dfrac{\eB^n + \eB^{n+1}}2, \fB(\dfrac{\UB^n + \UB^{n+1}}2, t_n + \dfrac k2) - \fB(\dfrac{\VB^n + \VB^{n+1}}2, t_n + \dfrac k2)\rangle \leq 0$。
+  故 $\langle \dfrac{\eB^n + \eB^{n+1}}2, \eB^{n+1}\rangle  \leq \langle \dfrac{\eB^n + \eB^{n+1}}2, \eB^{n}\rangle$。
+  所以 $\Vert \eB^{n+1}\Vert \leq \Vert \eB^n\Vert$，隐式中点法 B-稳定。
+\end{solution}
+
+\nocite{*}
+\printbibliography[heading=bibintoc, title=\ebibname]
+
+\end{document}
