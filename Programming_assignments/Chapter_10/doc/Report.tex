@@ -19,9 +19,8 @@
 
 \begin{verbatim}
     make all       # 编译该项目代码。
-    make run       # 编译并运行该项目代码，求解目录 data/ 下的样例，并保存结果于同目录
-                   # 同时，画图辅助文件将保存于 res/ 目录下。
-    make plot      # 编译，运行，绘制所有样例的图示。
+    make run       # 编译并运行该项目代码，求解目录 data/ratetest.txt，并保存结果于同目录。
+    make plot      # 编译，运行，绘制所有样例的图示 (data/alltest.txt)。
     make testspeed # 不同算法 CPU 用时比较（具体见 3.5 节）
 \end{verbatim}
 
@@ -496,7 +495,7 @@ Richard外插法主要用于精确解未知而算法预期收敛阶已知时对�
 
 我们对算例1进行测试。取时间步数为 $10^5,2\times 10^5,4\times 10^5,8\times 10^5$。三种方法的误差和效率分别如表1、2、3所示。
 
-\begin{table}\centering
+\begin{table}[H]\centering
 	\resizebox{0.75\columnwidth}{!}{
 	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|}
 	\hline
@@ -510,7 +509,7 @@ Richard外插法主要用于精确解未知而算法预期收敛阶已知时对�
 	\caption{Adam-Bashforth方法的误差和效率}
 \end{table}
 
-\begin{table}\centering
+\begin{table}[H]\centering
 	\resizebox{0.75\columnwidth}{!}{
 	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|}
 	\hline
@@ -524,7 +523,7 @@ Richard外插法主要用于精确解未知而算法预期收敛阶已知时对�
 	\caption{Adam-Moulton方法的误差和效率}
 \end{table}
 
-\begin{table}\centering
+\begin{table}[H]\centering
 	\resizebox{0.75\columnwidth}{!}{
 	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|}
 	\hline
@@ -545,7 +544,7 @@ Richard外插法主要用于精确解未知而算法预期收敛阶已知时对�
 
 所有RK方法的误差和效率如表4所示。
 
-\begin{table}\centering
+\begin{table}[H]\centering
 	\resizebox{0.75\columnwidth}{!}{
 	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
 	\hline
@@ -566,7 +565,7 @@ Richard外插法主要用于精确解未知而算法预期收敛阶已知时对�
 
 下面我们利用外插法对算例2进行测试。如表5所示。注意我们需要用外插法估计得到的事实上是单步误差，因此收敛阶应比算法本身的收敛阶高1。
 
-\begin{table}\centering
+\begin{table}[H]\centering
 	\resizebox{0.75\columnwidth}{!}{
 	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
 	\hline
@@ -588,7 +587,7 @@ Richard外插法主要用于精确解未知而算法预期收敛阶已知时对�
 
 改变容忍度tolerance，对算例1，计算两种方法的误差、步数和时间：
 
-\begin{table}\centering
+\begin{table}[H]\centering
 	\resizebox{0.75\columnwidth}{!}{
 	\begin{tabular}{|c|c|c|c|c|c|c|c|}
 	\hline
@@ -608,7 +607,9 @@ Richard外插法主要用于精确解未知而算法预期收敛阶已知时对�
 \subsection{算法性能比较}
 我们对于每个算法，我们通过二分 $N$ 的值，找到对于算例1当算法误差无穷范数小于 $1e-3$ 时的步数和 CPU 用时。执行 \texttt{make testspeed}，结果如下（短横线意为算法不收敛或者需要步数超过$2\times 10^6$）：
 
-\begin{longtable}{c|c|c|}
+\begin{table}[H]
+\begin{longtable}{|c|c|c|}
+    \hline
     算法名称 & 最少步数 & 最少时间 \\ \hline
     Adams-Bashforth($p=1$) & - & - \\ \hline
     Adams-Bashforth($p=2$) & - & - \\ \hline
@@ -630,6 +631,7 @@ Richard外插法主要用于精确解未知而算法预期收敛阶已知时对�
     Fehlberg & 28946 & 0.044 \\ \hline
     Dormand-Prince & 24819 & 0.043 \\ \hline
 \end{longtable}
+\end{table}
 
 综合比较，Gauss-Legendre算法和两个自适应算法的效率最高。
 

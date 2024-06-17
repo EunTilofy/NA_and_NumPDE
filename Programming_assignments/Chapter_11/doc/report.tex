@@ -1,0 +1,472 @@
+\documentclass[lang=cn,a4paper,newtx,bibend=bibtex]{elegantpaper}
+\usepackage{env}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+
+\title{\emph{《初边值问题求解器》}项目文档}
+\author{张志心~~3210106357~~计科2106}
+\date{Jun. 17. 2024}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{用户文档}
+
+\begin{verbatim}
+    make all       # 编译该项目代码。
+    make run       # 编译并运行该项目代码，并保存结果于 \texttt{/res}。
+    make plot      # 绘制所有样例的图示 (对所有 res/*.csv 绘图)。
+    make story     # 生成报告文档。
+\end{verbatim}
+
+\newpage
+\section{数值方法说明}
+
+线方法（Method of Lines, MOL）是一种求解初边值问题的方法。
+
+它主要分两步完成。
+第一步，在空间上离散，将初边值问题转化为关于 $U_j \approx u(\cdot,x_j)$ 的初值问题；
+第二步，在时间上离散，运用初值问题的方法（Euler方法、Runge-Kutta方法等）求解。
+
+在空间和时间上均建立均匀网格，步长分别为 $h=\frac 1m$ 和 $k=\frac TN$。
+
+我们用 $(m+1)(N+1)$ 个离散点处的值 $U_j^n(0\leq j\leq m, 0\leq n\leq N)$ 来拟合解函数。
+
+\subsection{Heat Equations}
+
+带Dirichlet边界条件的一维空间上的热方程（one-dimensional heat equation）形如
+\begin{eqnarray}
+    u_t - \nu u_{xx} = & 0, & \forall (x,t)\in \Omega = (0,1)\times (0,T), \\
+    u(x,0) = & f(x), & \forall x\in (0,1), \\
+    u(0,t) = & g_0(t), & \forall t\in (0,T), \\
+    u(1,t) = & g_1(t), & \forall t\in (0,T).
+\end{eqnarray}
+
+\subsubsection{空间离散}
+热方程的空间离散格式为：
+
+\begin{equation}
+    U_j'(t) = \frac{\nu}{h^2}(U_{j-1}(t) - 2U_j(t) + U_{j+1}(t)), U_0(t) = g_0(t), U_1(t) = g_1(t).
+\end{equation}
+
+这是一个 $m-1$ 维空间上的常微分方程组 $\UB'(t) = A\UB(t) + \gB(t)$。
+
+其中
+\begin{equation}
+    A=\frac {\nu}{h^2}
+    \MAT{
+        -2 & +1 & & & & \\
+        +1 & -2 & +1 & & & \\
+        & +1 & -2 & +1 & & \\
+        & & \ddots & \ddots & \ddots & \\
+        & & & +1 & -2 & +1 \\
+        & & & & +1 & -2 \\
+    },
+    \UB(t) = \MAT{
+        U_1(t) \\
+        U_2(t) \\
+        U_3(t) \\
+        \vdots \\
+        U_{m-2}(t) \\
+        U_{m-1}(t) \\
+    },
+    \gB(t) = \MAT{
+        g_0(t) \\
+        0 \\
+        0 \\
+        \vdots \\
+        0 \\
+        g_1(t) \\
+    }
+\end{equation}
+
+\subsubsection{时间离散1：$\theta-$方法}
+
+$\theta-$ 方法就是将Euler方法应用于热方程的空间离散格式。
+它是向前Euler方法和向后Euler方法的线性组合。具体格式为：
+\begin{equation}
+    \dfrac{U_j^{n+1}-U_j^n}k = \dfrac{\nu}{h^2}[\theta(U_{j-1}^{n+1}-2U_j^{n+1}+U_{j+1}^{n+1})+(1-\theta)(U_{j-1}^n-2U_j^n+U_{j+1}^n)].
+\end{equation}
+将上述方法整理，把上标为 $n+1$ 的项全部移到左侧，其他项移到右侧，即得到一个 $m+1$ 维稀疏线性方程组。
+
+当 $\theta=0$ 时，$\theta-$ 方法就是FTCS方法；
+$\theta=\frac 12$ 时，$\theta-$ 方法就是Crank-Nicoolson方法；
+$\theta=1$ 时，$\theta-$ 方法就是BTCS方法。
+
+$\theta-$ 方法是空间二阶、时间一阶收敛的。
+特别地，当 $\theta$ 取 $\frac 12-\frac {h^2}{12k\nu}$ 时，可以达到空间四阶、时间二阶收敛。
+当 $\theta\geq \frac 12$ 时，方法无条件稳定；
+$\theta\in [0,\frac 12)$ 且 $k\leq \frac{h^2}{2(1-2\theta)\nu}$ 时，方法稳定。
+
+\subsubsection{时间离散2：Gauss-Legendre RK 方法和组合 RK 方法}
+
+将 RK 方法应用于热方程的离散格式为
+
+\begin{eqnarray}
+    y_j^{n,l} = & \frac 1{h^2}(U_{j-1}^n - 2U_j^n + U_{j+1}^n + k\sum_{r=1}^sa_{l,r}(y_{j-1}^{n,r} - 2y_j^{n,r} + y_{j+1}^{n,r})), \\
+    U_j^{n+1} = & U_j^n + k\sum_{l=1}^s b_jy^{n,l}.
+\end{eqnarray}
+
+和 RK 方法应用于一般初值问题不同，我们在这里只需求解一个 $s(m+1)$ 维的稀疏线性方程组即可，而无需再使用不动点迭代。
+
+Gauss-Legendre 方法是空间二阶、时间二阶收敛的。
+Collocation RK 方法是空间二阶、时间三阶收敛的，且无条件稳定。
+
+\subsection{Advection Equations}
+
+带周期边界的一维空间上的平流方程（one-dimensional advection equations）形如
+\begin{eqnarray}
+    u_t + au_x = & 0, & \forall (x,t)\in \Omega = (0,1)\times (0,T), \\
+    u(x,0) = & f(x), & \forall x\in (0,1), \\
+    u(x+1, t) = & u(x, t). & \forall (x,t)\in \RBB\times (0,T). \\
+\end{eqnarray}
+
+平流方程的真解为
+\begin{equation}
+    u(x,t) = f(x-at).
+\end{equation}
+
+\subsubsection{LeapFrog 方法}
+
+对 $u_t$ 和 $u_x$ 都使用双边离散，离散格式为
+\begin{equation}
+    \frac{U_j^{n+1} - U_j^{n-1}}{2k} = -a\frac{U_{j+1}^n - U_{j-1}^n}{2h}.
+\end{equation}
+注意这里下标的加减都是循环移位。下同。
+
+这是一个直接法，无需求解方程组。注意当 $n=0$ 时因为 $n-1=-1$ 没有值，所以第一步使用单边导数离散代替：
+\begin{equation}
+    \frac{U_j^1 - U_j^0}{k} = -a\frac{U_{j+1}^0 - U_{j-1}^0}{2h}.
+\end{equation}
+
+\subsubsection{Lax-Friedrichs 方法}
+
+对 $u_t$ 的离散改用单边离散，并用两边平均值代替 $U_j^n$ 项。离散格式为
+\begin{equation}
+    U_j^{n+1} = \frac 12(U_{j-1}^n + U_{j+1}^n) - \frac {\mu}2(U_{j+1}^n - U_{j-1}^n).
+\end{equation}
+同样是直接法。这里 $\mu = \dfrac{ak}h$。
+
+\subsubsection{Lax-Wendroff 方法}
+
+在 $u(x,t)$ 处多展开一阶，离散格式为
+\begin{equation}
+    U_j^{n+1} = U_j^n - \frac {\mu}2(U_{j+1}^n - U_{j-1}^n) + \frac{\mu^2}2(U_{j+1}^n - 2U_j^n + U_{j-1}^n).
+\end{equation}
+同样是直接法。
+
+\subsubsection{Upwind 方法}
+
+注意到当 $a>0$ 时 $U_j^n$ 的值仅依赖其左侧的点，$a<0$ 反之。故离散格式为
+\begin{equation}
+    U^{n+1}_j = \left\{
+    \begin{aligned}
+        U^n_j - \mu(U^n_j - U^n_{j-1}), & a\geq 0\\
+        U^n_j - \mu(U^n_{j+1} - U^n_j), & a < 0.
+    \end{aligned}
+    \right.
+\end{equation}
+同样是直接法。
+
+\subsubsection{Beam-Warming 方法}
+
+在 Upwind 方法的基础上再多展开一阶，就得到了 Beam-Warming 方法。
+\begin{equation}
+    U^{n+1}_j = \left\{
+    \begin{aligned}
+        U^n_j - \frac{\mu}2(3U^n_j - 4U^n_{j-1} + U^n_{j-2}) + \frac{\mu^2}2(U^n_j - 2U_{j-1}^n + U_{j-2}^n), & a\geq 0\\
+        U^n_j - \frac{\mu}2(-3U^n_j + 4U^n_{j+1} - U^n_{j+2}) + \frac{\mu^2}2(U^n_j - 2U_{j+1}^n + U_{j+2}^n), & a < 0. \\
+    \end{aligned}
+    \right.
+\end{equation}
+同样是直接法。
+
+\newpage
+
+\section{数据测试}
+
+\subsection{热方程的测试}
+
+取 $g_0=0, g_1=0, f(x) = \max\left(0, 1+2\bigg|x-\dfrac 12\bigg|\right)$。
+
+该热方程没有解析解，但可以用 Fourier 变换计算出级数形式的精确解
+\begin{equation}
+    u(t,x) = \sum_{k=1}^\infty \frac {40}{k^2\pi^2}\left[-\sin\left(\dfrac{9}{20}k\pi\right) + 2\sin\left(\dfrac 12k\pi\right) - \sin\left(\dfrac{11}{20}k\pi\right)\right]e^{-k^2\pi^2t}\sin(k\pi x).
+\end{equation}
+取级数前 10 项即可控制误差在 $10^{-20}$ 以内，可以作为“真解”。
+
+\subsubsection{测试1：FTCS方法}
+
+作出FTCS方法在 $r=\dfrac 12, r=1$ 时 $t=k,2k,10k$ 的图像。
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/FTCS(r=0.5,t=1).png}
+        \caption{$r=0.5, t=k$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/FTCS(r=0.5,t=2).png}
+        \caption{$r=0.5, t=2k$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/FTCS(r=0.5,t=10).png}
+        \caption{$r=0.5, t=10k$}
+    \end{subfigure}
+%   \end{figure}
+%   \begin{figure}[H]
+%     \centering
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/FTCS(r=1,t=1).png}
+        \caption{$r=1, t=k$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/FTCS(r=1,t=2).png}
+        \caption{$r=1, t=2k$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/FTCS(r=1,t=10).png}
+        \caption{$r=1, t=10k$}
+    \end{subfigure}
+  \end{figure}
+
+该方法存在严重震荡，这也证实了它的无条件不稳定性。
+
+\subsubsection{测试2：Crank-Nicolson方法}
+
+作出Crank-Nicolson方法在 $r=1, r=2$ 时 $t=k,2k,10k$ 的图像。
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/CN(r=1,t=1).png}
+        \caption{$r=1, t=k$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/CN(r=1,t=2).png}
+        \caption{$r=1, t=2k$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/CN(r=1,t=10).png}
+        \caption{$r=1, t=10k$}
+    \end{subfigure}
+%   \end{figure}
+%   \begin{figure}[H]
+    % \centering
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/CN(r=2,t=1).png}
+        \caption{$r=2, t=k$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/CN(r=2,t=2).png}
+        \caption{$r=2, t=2k$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/CN(r=2,t=10).png}
+        \caption{$r=2, t=10k$}
+    \end{subfigure}
+  \end{figure}
+
+方法在 $N=10$ 时已经基本收敛，且 $r=1$ 时收敛速度更快。
+
+\subsubsection{测试3：BTCS方法}
+
+作出BTCS方法在 $r=1, r=10$ 时 $t=k,2k,10k$ 的图像。
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/BTCS(r=1,t=1).png}
+        \caption{$r=1, t=k$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/BTCS(r=1,t=2).png}
+        \caption{$r=1, t=2k$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/BTCS(r=1,t=10).png}
+        \caption{$r=1, t=10k$}
+    \end{subfigure}
+%   \end{figure}
+%   \begin{figure}[H]
+%     \centering
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/BTCS(r=10,t=1).png}
+        \caption{$r=10, t=k$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/BTCS(r=10,t=2).png}
+        \caption{$r=10, t=2k$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/BTCS(r=10,t=10).png}
+        \caption{$r=10, t=10k$}
+    \end{subfigure}
+  \end{figure}
+
+$r=1,N=10$ 时已经基本收敛；$r=2,N=10$ 时算法还有明显误差。
+
+\subsubsection{测试4：Collocation RK方法的测试}
+
+作出Collocation方法在 $r=1, r=\dfrac 1{2h}$ 时 $t=k,2k,10k$ 的图像。
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/RKM2(r=1,t=1).png}
+        \caption{$r=1, t=k$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/RKM2(r=1,t=2).png}
+        \caption{$r=1, t=2k$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/RKM2(r=1,t=10).png}
+        \caption{$r=1, t=10k$}
+    \end{subfigure}
+%   \end{figure}
+%   \begin{figure}[H]
+%     \centering
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/RKM2(r=10,t=1).png}
+        \caption{$r=10, t=k$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/RKM2(r=10,t=2).png}
+        \caption{$r=10, t=2k$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/RKM2(r=10,t=10).png}
+        \caption{$r=10, t=10k$}
+    \end{subfigure}
+  \end{figure}
+
+由于其极高的收敛阶，它在 $N=2$ 时就基本收敛。
+
+\subsubsection{测试5：一阶Gauss-Legendre方法的测试}
+
+作出Gauss-Legendre方法在 $r=1, r=\dfrac 1{2h}$ 时 $t=k,2k,10k$ 的图像。
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/GLRKM1(r=1,t=1).png}
+        \caption{$r=1, t=k$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/GLRKM1(r=1,t=2).png}
+        \caption{$r=1, t=2k$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/GLRKM1(r=1,t=10).png}
+        \caption{$r=1, t=10k$}
+    \end{subfigure}
+%   \end{figure}
+%   \begin{figure}[H]
+%     \centering
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/GLRKM1(r=10,t=1).png}
+        \caption{$r=10, t=k$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/GLRKM1(r=10,t=2).png}
+        \caption{$r=10, t=2k$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/GLRKM1(r=10,t=10).png}
+        \caption{$r=10, t=10k$}
+    \end{subfigure}
+  \end{figure}
+
+$r=1$ 时，这个方法和Crank-Nicolson方法实际上是一种方法，因此图像也完全相同。
+但 $r=\dfrac 1{2h}$ 时，Gauss-Legendre方法出现了明显的振荡。
+
+\subsection{平流方程的测试}
+
+取 $a=1, f(x) = \exp\{-20(x-2)^2\}+\exp\{-(x-5)^2\}, \Omega = [15,25]\times (0,17)$，则
+\begin{equation}
+    u(t,x) = f(x-t) = \exp\{-20(x-t-2)^2\} + \exp\{-(x-t-5)^2\}.
+\end{equation}
+
+我们作出 $t=T$ 时的以下图像：
+\begin{enumerate}
+    \item 真解
+    \item leapfrog($k=0.8h$)
+    \item upwind($k=0.8h$)
+    \item Beam-Warming($k=0.8h$)
+    \item Lax-Friedrichs($k=0.8h$)
+    \item Lax-Wendroff($k=0.8h$)
+    \item Lax-Wendroff($k=h$)
+    \item leapfrog($k=h$)
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/leapfrog(k=0.8h).png}
+        \caption{leapfrog,$k=0.8h$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/upwind(k=0.8h).png}
+        \caption{upwind,$k=0.8h$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{../res/BW(k=0.8h).png}
+        \caption{Beam-Warming,$k=0.8h$}
+    \end{subfigure}
+%   \end{figure}
+%   \begin{figure}[H]
+    % \centering
+    \begin{subfigure}[b]{0.23\textwidth}
+        \includegraphics[width=\textwidth]{../res/LF(k=0.8h).png}
+        \caption{Lax-Friedrichs,$k=0.8h$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.23\textwidth}
+        \includegraphics[width=\textwidth]{../res/LW(k=0.8h).png}
+        \caption{Lax-Wendroff,$k=0.8h$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.23\textwidth}
+        \includegraphics[width=\textwidth]{../res/LW(k=h).png}
+        \caption{Lax-Wendroff,$k=h$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.23\textwidth}
+        \includegraphics[width=\textwidth]{../res/leapfrog(k=h).png}
+        \caption{leapfrog,$k=h$}
+    \end{subfigure}
+  \end{figure}
+
+在 $k=0.8h$ 时，各种方法都有较大误差，
+upwind和Lax-Friedrichs主要体现在峰的大小上；
+而其他算法则体现在峰值附近的振荡和峰值位置的偏差。
+而在 $k=h$ 时，这里展示的两种方法求出的解都是精确的，
+事实上所有五种方法都应该完全精确，因为从依赖域上看，它们在初值上的依赖域都是单点，即真解的点。
+
+\end{document}

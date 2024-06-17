@@ -131,28 +131,32 @@ int main(int argc, char** argv)
                 else out<<err2;
                 out<<fixed<<setprecision(3)<<", Timecost = "<<dur<<endl;
             }
+        out.close();
     };
     
     auto plottest = [&]()
     {
         ifstream in("data/alltest.txt");
-        ofstream out("data/alltest.res");
+        // ofstream out("data/alltest.res");
         Task task;
         while(readTask(in, task))
             for (Prob pb : {prob1, prob2})
             {
                 auto [ans, dur, err1, err2] = solve(pb, task);
-                out<<scientific<<setprecision(2)<<pb.name<<" with "<<task.id
-                   <<": N = "<<ans.size()-1<<", err1 = "<<err1<<", err2 = ";
-                if(err2<0)out<<"/";
-                else out<<err2;
-                out<<fixed<<setprecision(3)<<", Timecost = "<<dur<<endl;
+                // out<<scientific<<setprecision(2)<<pb.name<<" with "<<task.id
+                //    <<": N = "<<ans.size()-1<<", err1 = "<<err1<<", err2 = ";
+                // if(err2<0)out<<"/";
+                // else out<<err2;
+                // out<<fixed<<setprecision(3)<<", Timecost = "<<dur<<endl;
                 print(ans, "res/"s+pb.name+"_"+task.id+"_"+to_string(task.N)+".csv", 0, pb.T, 5000);
             } 
     };
 #ifndef TESTSPEED
-    ratetest();
-    plottest();
+    #ifndef PLOT
+        ratetest();
+    #else
+        plottest();
+    #endif
 #else
     { // least time to make eps <= 1e-3 (use IVP10.199)
     auto bi_search = [&] (const Prob& pb, string id) -> pair<db, int> /*Timecost, Numstep*/

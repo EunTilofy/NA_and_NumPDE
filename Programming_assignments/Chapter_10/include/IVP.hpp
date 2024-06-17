@@ -89,7 +89,7 @@ public:
                 for(auto val : u) ret += val * val;
                 return sqrt(ret);
             };
-            auto cal = [=] (int i, const Utype& yi) -> Utype
+            auto cal = [&] (int i, const Utype& yi) -> Utype
             {
                 Utype ret = a[i][i] * yi;
                 for (int j = 0; j < i; ++j)
@@ -130,7 +130,7 @@ public:
             }
             return res;
         };
-        auto cal = [=] (const vector<Utype>& y) -> vector<Utype>
+        auto cal = [&] (const vector<Utype>& y) -> vector<Utype>
         {
             vector<Utype> ret(y.size());
             for (int i = 0; i < s; ++i)

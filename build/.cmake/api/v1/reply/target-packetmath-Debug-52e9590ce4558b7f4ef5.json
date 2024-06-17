@@ -1,0 +1,197 @@
+{
+	"backtrace" : 2,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_custom_target",
+			"ei_add_test",
+			"add_dependencies"
+		],
+		"files" : 
+		[
+			"cmake/EigenTesting.cmake",
+			"test/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 1
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 166,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 210,
+				"parent" : 1
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 214,
+				"parent" : 1
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 214,
+				"parent" : 1
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 214,
+				"parent" : 1
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 214,
+				"parent" : 1
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 214,
+				"parent" : 1
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 214,
+				"parent" : 1
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 214,
+				"parent" : 1
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 214,
+				"parent" : 1
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 214,
+				"parent" : 1
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 214,
+				"parent" : 1
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 214,
+				"parent" : 1
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 214,
+				"parent" : 1
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 214,
+				"parent" : 1
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 214,
+				"parent" : 1
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 214,
+				"parent" : 1
+			}
+		]
+	},
+	"dependencies" : 
+	[
+		{
+			"backtrace" : 3,
+			"id" : "packetmath_1::@36f028580bb02cc8272a"
+		},
+		{
+			"backtrace" : 4,
+			"id" : "packetmath_2::@36f028580bb02cc8272a"
+		},
+		{
+			"backtrace" : 5,
+			"id" : "packetmath_3::@36f028580bb02cc8272a"
+		},
+		{
+			"backtrace" : 6,
+			"id" : "packetmath_4::@36f028580bb02cc8272a"
+		},
+		{
+			"backtrace" : 7,
+			"id" : "packetmath_5::@36f028580bb02cc8272a"
+		},
+		{
+			"backtrace" : 8,
+			"id" : "packetmath_6::@36f028580bb02cc8272a"
+		},
+		{
+			"backtrace" : 9,
+			"id" : "packetmath_7::@36f028580bb02cc8272a"
+		},
+		{
+			"backtrace" : 10,
+			"id" : "packetmath_8::@36f028580bb02cc8272a"
+		},
+		{
+			"backtrace" : 11,
+			"id" : "packetmath_9::@36f028580bb02cc8272a"
+		},
+		{
+			"backtrace" : 12,
+			"id" : "packetmath_10::@36f028580bb02cc8272a"
+		},
+		{
+			"backtrace" : 13,
+			"id" : "packetmath_11::@36f028580bb02cc8272a"
+		},
+		{
+			"backtrace" : 14,
+			"id" : "packetmath_12::@36f028580bb02cc8272a"
+		},
+		{
+			"backtrace" : 15,
+			"id" : "packetmath_13::@36f028580bb02cc8272a"
+		},
+		{
+			"backtrace" : 16,
+			"id" : "packetmath_14::@36f028580bb02cc8272a"
+		},
+		{
+			"backtrace" : 17,
+			"id" : "packetmath_15::@36f028580bb02cc8272a"
+		}
+	],
+	"id" : "packetmath::@36f028580bb02cc8272a",
+	"name" : "packetmath",
+	"paths" : 
+	{
+		"build" : "test",
+		"source" : "test"
+	},
+	"sources" : [],
+	"type" : "UTILITY"
+}
