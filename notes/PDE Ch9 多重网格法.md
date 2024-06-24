@@ -360,7 +360,7 @@ $$
 \end{aligned}
 $$
 
-【引理9.51】假设存在一个和网格大小 $h$ 无关的常数 $K\in\mathbb{R}^+$ 满足 $\|I_{2h}^h\mathbf{u}^{2h} - \mathbf{u}^h\|_{A^h} \le Kh^p$，其中 $p=2$ 是收敛率。
+【引理9.51】假设存在一个和网格大小 $h$ 无关的常数 $K\in\mathbb{R}^+$ 满足 $\|I_{2h}^h\mathbf{u}^{2h} - \mathbf{u}^h\|_{A^h} \le Kh^p$，其中 $p=2$ 是收敛率，则$\|\mathbb{e}^h\|\leq K'h^p$。
 
 **证明：**
 

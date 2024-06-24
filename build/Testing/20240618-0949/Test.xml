@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Site BuildName="darwin-23.5.0-clang++-15.0.0-sse2-64bit"
+	BuildStamp="20240618-0949-Experimental"
+	Name="paperclouddemacbook-pro.local"
+	Generator="ctest-3.26.4"
+	CompilerName="/Library/Developer/CommandLineTools/usr/bin/c++"
+	CompilerVersion="15.0.0.15000309"
+	OSName="macOS"
+	Hostname="PaperClouddeMacBook-Pro.local"
+	OSRelease="14.5"
+	OSVersion="23F79"
+	OSPlatform="arm64"
+	Is64Bits="1"
+	VendorString="IBM"
+	VendorID="IBM"
+	FamilyID="16777228"
+	ModelID="2"
+	ProcessorCacheSize="131072"
+	NumberOfLogicalCPU="8"
+	NumberOfPhysicalCPU="8"
+	TotalVirtualMemory="2048"
+	TotalPhysicalMemory="16384"
+	LogicalProcessorsPerPhysical="8"
+	ProcessorClockFrequency="0"
+	>
+	<Testing>
+		<StartDateTime>Jun 18 17:49 CST</StartDateTime>
+		<StartTestTime>1718704156</StartTestTime>
+		<TestList/>
+		<EndDateTime>Jun 18 17:49 CST</EndDateTime>
+		<EndTestTime>1718704157</EndTestTime>
+		<ElapsedMinutes>0</ElapsedMinutes>
+	</Testing>
+</Site>
